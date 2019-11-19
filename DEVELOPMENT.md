@@ -60,3 +60,15 @@ I was able to successfully implement an n^d array using a one-dimensional
 are given by d-length vectors. The index in the one-dimensional array is given
 by `\sum_{i=0}^{d-1} n^i*v[i]`. I also implemented bounds checking for the
 coordinate given for element access.
+
+## 11/18/19
+Today I got an empty project that includes ofxTalky to compile. This was
+difficult for a couple of reasons. First, ofxTalky was based on an old version
+of openFrameworks, so it used an old interface for ofThread. I had to convert
+the startThread and stopThread function calls to follow the new interface.
+Second, ofxTalky requires Poco. I tried adding ofxPoco to addons.make, but that
+caused a segfault immediately upon any call to an openFrameworks function (ie 
+ofSetupOpenGL). To solve this issue, I followed the advice at
+https://forum.openframeworks.cc/t/using-ofxpoco-results-into-segmentation-fault/30214
+. I removed ofxPoco, I installed poco on my system, and I modified the
+addon_config.mk file of ofxTalky to use the correct linker flags.
