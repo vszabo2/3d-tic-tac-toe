@@ -15,6 +15,9 @@ class NdArray {
    public:
     NdArray(int side_length, int num_dimensions);
     T& operator[](std::vector<int> coordinates);
+
+    int GetSideLength() { return side_length_; };
+    int GetNumDimensions() { return num_dimensions_; };
 };
 
 #include "nd_array.hpp"
