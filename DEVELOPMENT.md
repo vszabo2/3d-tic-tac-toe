@@ -72,3 +72,29 @@ ofSetupOpenGL). To solve this issue, I followed the advice at
 https://forum.openframeworks.cc/t/using-ofxpoco-results-into-segmentation-fault/30214
 . I removed ofxPoco, I installed poco on my system, and I modified the
 addon_config.mk file of ofxTalky to use the correct linker flags.
+
+## 11/19/19
+I was able to use my NdArray class in my openFrameworks project by adding 
+`PROJECT_EXTERNAL_SOURCE_PATHS = ../common/` to config.make. I set up an
+ofxTalky object to act as a server and send an NdArray of ints through it.
+
+## 11/20/19
+I created another openFrameworks project with an ofxTalky object acting as a
+client. It connects to the server running on the local machine in the other
+openFrameworks project and extracts an NdArray of ints from it.
+
+Currently, this doesn't work well. The two int parameters get passed through
+correctly, but the contents of the array does not. This is because the current
+way the NdArray is being serialized is by copying its static memory, including
+the ints and whatever static memory is in the std::vector. However, the bulk of
+the array is stored in dynamic memory. The std::vector only has a pointer to the
+data. The value of the pointer gets sent over, but not the data itself. When the
+client receives the NdArray, the value of the pointer to the data in the
+internal std::vector is set, but it points to a memory address in the server,
+which is an invalid address in the client. This causes a segfault.
+
+To fix this, I will implement my own serialization of the NdArray class. I will
+make the class inherit from TalkySerializable and implement the functions
+associated with that "interface." Besides my two int data members,
+I will need to put the size of the std::vector and the memory that its data
+pointer points to into the buffer.
