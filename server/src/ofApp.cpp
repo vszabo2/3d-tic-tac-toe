@@ -1,13 +1,30 @@
 #include "ofApp.h"
 
+#include "nd_array.h"
+
 //--------------------------------------------------------------
 void ofApp::setup(){
-
+    talky.setup();
+    header.setCompany("VS");
+    header.setProtocol("TT");
+    header.setVersion(2);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    NdArray<int> arr(3, 2);
 
+    int val = 9;
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            arr[{i, j}] = val--;
+        }
+    }
+
+    header.setContentsType(1);
+    TalkyMessage message(header);
+    message << arr;
+    talky << message;
 }
 
 //--------------------------------------------------------------
