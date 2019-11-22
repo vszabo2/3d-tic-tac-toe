@@ -14,16 +14,16 @@ void ofApp::setup(){
 void ofApp::update(){
     NdArray<int> arr(3, 2);
 
-    int val = 9;
+    int val = 8;
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             arr[{i, j}] = val--;
         }
     }
 
-    header.setContentsType(1);
+    header.setContentsType(floor(ofGetElapsedTimef()));
     TalkyMessage message(header);
-    message << arr;
+    message << (TalkySerialisable&) arr;
     talky << message;
 }
 

@@ -10,21 +10,22 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    std::cout << "A" << std::endl;
     TalkyMessage message;
     talky >> message;
+    std::cout << "Contents Type: "
+              << message.getHeader().getContentsType() << std::endl;
     NdArray<int> arr(0, 0);
-    if (message >> arr) {
-        std::cout << arr.GetSideLength() << std::endl;
-        std::cout << arr.GetNumDimensions() << std::endl;
+    if (message >> (TalkySerialisable&) arr) {
+        std::cout << arr.GetSideLength() << '^'
+                  << arr.GetNumDimensions() << " array:" << std::endl;
+
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
-                std::cout << arr[{i, j}];
+                std::cout << arr[{i, j}] << ' ';
             }
         }
         std::cout << std::endl;
     }
-    std::cout << "B" << std::endl;
 }
 
 //--------------------------------------------------------------

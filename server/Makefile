@@ -6,7 +6,7 @@ endif
 
 # make sure the the OF_ROOT location is defined
 ifndef OF_ROOT
-	OF_ROOT=$(realpath ../../../../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace)
+	OF_ROOT=/home/victor/of-workspace
 endif
 
 # call the project makefile!
