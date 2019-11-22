@@ -24,3 +24,20 @@ T& NdArray<T>::operator[](std::vector<int> coordinates) {
 
     return data_[index];
 }
+
+template <typename T>
+void NdArray<T>::serialiseToBuffer(TalkyBuffer &b) const {
+    b << side_length_ << num_dimensions_;
+    b.write(data_.data(), data_.size() * sizeof(T));
+}
+
+template <typename T>
+bool NdArray<T>::deSerialiseFromBuffer(TalkyBuffer &b) {
+    bool success = b >> side_length_ && b >> num_dimensions_;
+    if (!success) return false;
+
+    data_.assign(pow(side_length_, num_dimensions_), T());
+
+    success = b.read(data_.data(), data_.size() * sizeof(T));
+    return success;
+}

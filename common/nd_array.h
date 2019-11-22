@@ -5,8 +5,10 @@
 #include <stdexcept>
 #include <vector>
 
+#include "ofxTalky.h"
+
 template <typename T>
-class NdArray {
+class NdArray : public TalkySerialisable {
    private:
     std::vector<T> data_;
     int side_length_;
@@ -18,6 +20,9 @@ class NdArray {
 
     int GetSideLength() { return side_length_; };
     int GetNumDimensions() { return num_dimensions_; };
+
+    void serialiseToBuffer(TalkyBuffer &b) const;
+    bool deSerialiseFromBuffer(TalkyBuffer &b);
 };
 
 #include "nd_array.hpp"
