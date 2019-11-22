@@ -98,3 +98,21 @@ make the class inherit from TalkySerializable and implement the functions
 associated with that "interface." Besides my two int data members,
 I will need to put the size of the std::vector and the memory that its data
 pointer points to into the buffer.
+
+## 11/21/19
+I represent an NdArray in binary serialized form starting with the side length,
+followed by the number of dimensions, followed by the data of the contents
+of the array as it is represented internally in the vector, one element
+followed by another. This will work as long as the elements have only static
+memory. If I was interested in serializing an array that has elements that
+have dynamic memory, I could serialize each one of the elements.
+
+I implemented this by making NdArray inherit from TalkySerialisable and
+implementing the serialization and deserialization functions. To take
+advantage of my method of serialization instead of the default memcpy that is
+used with the insertion operator, I had to cast my NdArray object to a
+TalkySerialisable&. Without the cast, the old memcpy serialization is used.
+
+I had to modify the extraction operator of TalkyMessage to be able to
+incrementally deserialize the NdArray. I removed the check that the size of the
+buffer is the same as the sizeof the item into which I was extracting.
