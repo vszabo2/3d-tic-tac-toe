@@ -116,3 +116,41 @@ TalkySerialisable&. Without the cast, the old memcpy serialization is used.
 I had to modify the extraction operator of TalkyMessage to be able to
 incrementally deserialize the NdArray. I removed the check that the size of the
 buffer is the same as the sizeof the item into which I was extracting.
+
+## 11/23/19
+Today I considered merging my two openFrameworks projects (client and server)
+into one, with two separate main classes. I was able to do this by changing the
+makefile and main.cpp. I added this to config.make:
+```
+client :
+	APPNAME=client PROJECT_DEFINES=MAIN_CLASS=ClientApp make
+server :
+	APPNAME=server PROJECT_DEFINES=MAIN_CLASS=ServerApp make
+```
+And, I changed made main.cpp have this line:
+```
+	ofRunApp(new MAIN_CLASS());
+```
+I would have all of the files that are common to the two apps in the src
+directory of one project, and separate ClientApp.h, ClientApp.cpp, ServerApp.h,
+ServerApp.cpp.
+
+The approach of merging the projects would make the file structure flatter and
+require less switching directories. But, it uses a nonstandard makefile. This is
+a major disadvantage. Not having to mess with the makefile is one of
+openFrameworks' main principles. Going forward with this idea would make it
+quite difficult for anyone to build my project, except if they use my makefile.
+
+So, I will go back to having multiple openFrameworks projects, with a separate
+directory outside with common files. Initially, I thought I would have my common
+files not depend on openFrameworks, but there really are parts that are common
+to the client and server that need openFrameworks. It will be nice to be able
+to easily see which files belong to which app. Also, it will be possible to
+compile my app on nearly any platform supported by openFrameworks.
+
+I also considered deleting the .qbs files in each project directory, since I
+don't use them at all. But, I decided to keep them, so that anyone who uses qbs
+can easily build my project. It doesn't really hurt me to have them. However,
+the openFrameworks project generator doesn't properly update them. I have to
+update them myself.
+decided to kee
