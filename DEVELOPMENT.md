@@ -153,4 +153,130 @@ don't use them at all. But, I decided to keep them, so that anyone who uses qbs
 can easily build my project. It doesn't really hurt me to have them. However,
 the openFrameworks project generator doesn't properly update them. I have to
 update them myself.
-decided to kee
+
+## 11/26/19
+One of the things I considered today was having a distributed architecture for
+multiplayer purposes. The way this would work theoretically is that there would
+be a central server on the Internet that would help people find others to play
+with. Clients would connect to it and specify the kind of game (board size)
+they were looking for. Once enough players made their interests known, the
+server would give each player that signed up for a particular game information
+on how to connect with each other, as well as the order they would move in. The
+clients would then drop the connection to the central server, listen for a
+connection from the player before them, and try to establish a connection with
+the player after them. The last player to move would connect with the first.
+This way, data can be passed around a circle to all players. Whenever someone
+made a move, they would send a message to the next player indicating who it was
+that made the move and the board location where they moved. Each player would
+use this information to update their view of the board and then pass the message
+along to the next player, until the message gets to the player who moves before
+the player that made the move the message is about, who would stop forwarding
+the message. After finding out that a particular player made a move, the player
+in the order after the player who made the move would know it is their turn to
+make a move, and play would continue thus. For this project, I would code only
+the software that the players run that connects in a circle, displays the board,
+and takes and sends input. This program would take in a message that simulates
+a message from the central server.
+
+This novel architecture has some advantages and disadvantages, compared with the
+architecture in which each player connects to one server that passes messages
+between them. Advantages include having fewer components to code (only one
+application is necessary, as opposed to a client app and server app),
+better scalability (the central server doesn't have to manage all of the games
+constantly, only set up the connections), and fewer single points of failure
+(#players as compared to #players + 1). Disadvantages include the
+impracticability of peer-to-peer connections over the Internet and the ability
+of a malicious player to falsely report another player's move (although there
+are ways to solve this and although the centralized architecture is not
+inherently secure either). The main advantage of the decentralized idea is that
+I would not need to create a separate server application, but creating a server
+app that manages one game of TicTacToe is not difficult. I will continue with
+the client-server architecture.
+
+I also considered the impact of having an arbitrary number of dimensions on my
+project. I would need to implement the visualization of the board separately for
+each individual number of dimensions - I am not in a position to create a
+scalable way to display a board of an arbitrary number of dimensions. Although
+I have ideas about how to do this, they are not very good - the payoff of
+implementing them would be small. So, I will focus on the three-dimensional
+game.
+
+This is how the communication will work:
+ 1. The server app is started and the game is configured (board side length
+    and number of players). The app listens for incoming connections.
+ 2. The client app is started and the user inputs the connection information of
+    the server. The client connects to the server. The server sends the board
+    side length to the client as well as a player id that is unique in the game.
+ 3. When as many clients have connected as is specified, the server begins the
+    game.
+ 4. The server tells each client the player id of the first client that is to
+    make a move.
+ 5. That client sends the server its own player id and the position of the move
+    it wishes to make.
+ 6. The server sends to all clients the entire board.
+ 7. The server sends to all clients the player id of the next player, whose turn
+    it is to move.
+ 8. Repeat from number 5.
+
+## 11/27/19
+I have realized that ofxTalky has a number of faults. It is not possible for a
+server with multiple clients to know which client sent any message, nor to send
+a message to only one client. Also, it cannot receive messages that take more
+than one packet. Combined with the other issues I have found and corrected with
+this library, I consider ofxTalky a low-quality library. I do not want to
+continue using it.
+
+I will need to mostly start over, since the work I have done so far is specific
+to ofxTalky. I do not think that I would lose so much progress as would make it
+impossible for me to finish on time. Seeing as I'm starting over, I am
+reconsidering my choice of architecture. Now, I think that the distributed
+architecture is preferable. In the distributed architecture, I would only need
+to pass one type of message, which contains exactly as much information as is
+necessary. This message would include the ID of the player who made a particular
+move and the coordinates of the move. Since I am fixing the number of dimensions
+to 3 for now, this message is very easy to encode. The message has a length of
+4 bytes, of which the first is the player id, and the remaining 3 are the
+coordinates, in order. These messages will be sent to all players (indirectly).
+The play can advance to the next player based on this message: when a client
+receives a message that the player just before them in the order has made a
+move, they know that it is their turn to make a move.
+
+Each player needs to know their own ID, the ID of the player before them and the
+player after them. We will assign ID 0 to the first player, ID 1 to the player
+that moves after the first player, and so on. So, if each player knows their own
+ID, they know all the IDs necessary.
+
+To set up this game, each player needs to know how to connect to the player that
+comes after them in the order. This information would be provided by the central
+server. I will use a local configuration file for each client that simulates a
+message from the central server that would be sent when the game is ready to
+begin. It needs to include the side length of the 3D cube, the ID of the client,
+the number of players, and at least the connection information of the next
+player in the order. To simplify things, I will put the connection information
+of all the players in the local configuration file that I am using for now, so
+that the only difference between the files given to each player is the player
+ID, for ease of setup.
+
+What library will I use for networking, instead of ofxTalky? I could use system
+functions directly, but this is not portable and not very easy to code. I could
+use ofxNetwork, but that is poorly-documented and geared more toward textual
+messages. I just want to send 4 bytes, which should fit in one TCP packet, so I
+can expect to receive it all at once. I can use the boost asio library for my
+networking needs. Boost also has a different library (Program Options) that I
+can use for reading the configuration file.
+
+The application will be in one of the three states Setup, Move, and Read at all
+times. The initial state is Setup. In this state, the application is working to
+establish connections with the previous and next players in the order. When this
+state is entered, asynchronous operations for accepting a connection from the
+previous player and making a connection to the next player are started. This
+state is exited when there is a connection with both the next and previous
+player. The next state depends on whether the player ID is 0. If the player ID
+is 0, the next state is Move; otherwise, it is Read. In the Move state, a cursor
+is displayed in the board, which can be moved around using the keyboard. When
+the user accepts the selection, a message is sent to the next player and the
+state transitions to Read. In the Read state, the application recieves messages
+from the previous player, updates the board accordingly, and passes the
+message on, unless its player ID matches that of the next player. If the message
+has the player ID of the previous player, the application transitions to the
+Move state.
