@@ -1,31 +1,13 @@
 #include "ofApp.h"
 
-#include <iostream>
-
 //--------------------------------------------------------------
 void ofApp::setup(){
-    talky.setup("127.0.0.1");
 
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    TalkyMessage message;
-    talky >> message;
-    std::cout << "Contents Type: "
-              << message.getHeader().getContentsType() << std::endl;
-    NdArray<int> arr(0, 0);
-    if (message >> (TalkySerialisable&) arr) {
-        std::cout << arr.GetSideLength() << '^'
-                  << arr.GetNumDimensions() << " array:" << std::endl;
 
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                std::cout << arr[{i, j}] << ' ';
-            }
-        }
-        std::cout << std::endl;
-    }
 }
 
 //--------------------------------------------------------------

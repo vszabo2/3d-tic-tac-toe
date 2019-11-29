@@ -6,9 +6,9 @@
 ################################################################################
 # OF ROOT
 #   The location of your root openFrameworks installation
-#       (default) OF_ROOT = ../../../../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace 
+#       (default) OF_ROOT = ../../../../../of-workspace 
 ################################################################################
-# OF_ROOT = ../../../../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace/../../of-workspace
+# OF_ROOT = ../../../../../of-workspace
 
 ################################################################################
 # PROJECT ROOT
@@ -37,7 +37,7 @@
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-PROJECT_EXTERNAL_SOURCE_PATHS = ../common/
+# PROJECT_EXTERNAL_SOURCE_PATHS = 
 
 ################################################################################
 # PROJECT EXCLUSIONS
