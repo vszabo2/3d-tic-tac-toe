@@ -2,7 +2,7 @@
 
 #include <boost/asio.hpp>
 
-#include "nd_array.h"
+#include "cube.h"
 #include "ofMain.h"
 
 class ofApp : public ofBaseApp {
