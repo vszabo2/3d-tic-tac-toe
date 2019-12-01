@@ -34,8 +34,37 @@ class ofApp : public ofBaseApp {
         Board(char side_length) : Cube<char, char>(side_length) { fill(EMPTY); }
     } board_;
 
+    boost::asio::io_context io_context_;
+    boost::asio::ip::tcp::acceptor acceptor_;
+    boost::asio::ip::tcp::socket sock_next_;
+    boost::asio::ip::tcp::socket sock_prev_;
+    boost::asio::ip::tcp::endpoint next_player_endpoint_;
+    boost::asio::streambuf send_buf_;
+    boost::asio::streambuf recv_buf_;
+    bool sock_next_connected_;
+
     std::string next_player_connection_status_;
     std::string prev_player_connection_status_;
+    template <typename HandlerType>
+    class Handler {
+        HandlerType handler_;
+
+       public:
+        ofApp* owner;
+        Handler(HandlerType handler) : handler_(handler) {}
+        template <typename... Args>
+        void operator()(Args... args) {
+            (owner->*handler_)(args...);
+        }
+    };
+    Handler<void (ofApp::*)(const boost::system::error_code&)> connect_handler_;
+    Handler<void (ofApp::*)(const boost::system::error_code&, std::size_t)> read_handler_;
+
+    void onAccept(const boost::system::error_code& error);
+    void onConnect(const boost::system::error_code& error);
+    void onRead(const boost::system::error_code& error, std::size_t bytes_transferred);
+    void StartGameIfReady();
+    void SendMove(const char message[]);
 
     glm::vec3 GetCenterOfPosition(Position position);
     void DrawField();
@@ -54,7 +83,17 @@ class ofApp : public ofBaseApp {
         : colors_({ofColor::red, ofColor::green, ofColor::blue, ofColor::purple,
                    ofColor::chocolate}),
           game_config_(config),
-          board_(config.side_length) {}
+          board_(config.side_length),
+          io_context_(),
+          acceptor_(io_context_),
+          sock_next_(io_context_),
+          sock_prev_(io_context_),
+          next_player_endpoint_(
+              boost::asio::ip::make_address(config.next_address),
+              config.next_port),
+          sock_next_connected_(false),
+          connect_handler_(&ofApp::onConnect),
+          read_handler_(&ofApp::onRead) {}
 
     void setup();
     void update();
