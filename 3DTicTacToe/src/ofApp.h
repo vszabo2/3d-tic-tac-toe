@@ -7,6 +7,15 @@
 
 typedef Point<char> Position;
 
+struct GameConfig {
+    unsigned short side_length;
+    unsigned short player_count;
+    unsigned short player_index;
+    unsigned short my_port;
+    std::string next_address;
+    unsigned short next_port;
+};
+
 class ofApp : public ofBaseApp {
    private:
     static const float slot_size_;
@@ -18,6 +27,7 @@ class ofApp : public ofBaseApp {
     float field_size_;
     ofEasyCam cam_;
     Position cursor_position_;
+    const GameConfig& game_config_;
     class Board : public Cube<char, char> {
        public:
         static const char EMPTY = -1;
@@ -31,10 +41,11 @@ class ofApp : public ofBaseApp {
     void DrawMarker(char playerIdx, Position position);
 
    public:
-    ofApp(char board_size)
+    ofApp(const GameConfig& config)
         : colors_({ofColor::red, ofColor::green, ofColor::blue, ofColor::purple,
                    ofColor::chocolate}),
-          board_(board_size) {}
+          game_config_(config),
+          board_(config.side_length) {}
 
     void setup();
     void update();
