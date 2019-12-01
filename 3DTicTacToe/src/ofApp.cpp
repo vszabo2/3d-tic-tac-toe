@@ -54,12 +54,22 @@ void ofApp::DrawMarker(char playerIdx, Position position) {
     ofPopStyle();
 }
 
+inline void ofApp::DrawBoard() {
+    DrawField();
+    DrawMarkers();
+}
+
 //--------------------------------------------------------------
 void ofApp::setup() {
     field_size_ = board_.GetSideLength() * slot_size_;
     board_[{0, 0, 0}] = 1;
     board_[{1, 1, 1}] = 0;
     cursor_position_ = {0, 0, 0};
+    active_draw_ = &ofApp::drawSetup;
+
+    next_player_connection_status_ = "Connecting to next player...";
+    prev_player_connection_status_ =
+        "Waiting for previous player to connect...";
 
     // This order of cam setup calls is important.
     // It is important to set the position before the target, so that setTarget
@@ -82,11 +92,24 @@ void ofApp::setup() {
 void ofApp::update() {}
 
 //--------------------------------------------------------------
-void ofApp::draw() {
+void ofApp::draw() { (this->*active_draw_)(); }
+
+void ofApp::drawSetup() {
+    ofDrawBitmapString("Setup", 0, 20);
+    ofDrawBitmapString(prev_player_connection_status_, 0, 40);
+    ofDrawBitmapString(next_player_connection_status_, 0, 60);
+}
+
+void ofApp::drawMove() {
     cam_.begin();
-    DrawField();
-    DrawMarkers();
+    DrawBoard();
     DrawCursor();
+    cam_.end();
+}
+
+void ofApp::drawWait() {
+    cam_.begin();
+    DrawBoard();
     cam_.end();
 }
 

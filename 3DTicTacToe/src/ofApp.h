@@ -34,11 +34,20 @@ class ofApp : public ofBaseApp {
         Board(char side_length) : Cube<char, char>(side_length) { fill(EMPTY); }
     } board_;
 
+    std::string next_player_connection_status_;
+    std::string prev_player_connection_status_;
+
     glm::vec3 GetCenterOfPosition(Position position);
     void DrawField();
     void DrawCursor();
     void DrawMarkers();
     void DrawMarker(char playerIdx, Position position);
+    inline void DrawBoard();
+
+    void (ofApp::*active_draw_)();
+    void drawSetup();
+    void drawMove();
+    void drawWait();
 
    public:
     ofApp(const GameConfig& config)
