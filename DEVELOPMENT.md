@@ -244,7 +244,7 @@ move, they know that it is their turn to make a move.
 Each player needs to know their own ID, the ID of the player before them and the
 player after them. We will assign ID 0 to the first player, ID 1 to the player
 that moves after the first player, and so on. So, if each player knows their own
-ID, they know all the IDs necessary.
+ID and the number of players, they know all the IDs necessary.
 
 To set up this game, each player needs to know how to connect to the player that
 comes after them in the order. This information would be provided by the central
@@ -265,18 +265,103 @@ can expect to receive it all at once. I can use the boost asio library for my
 networking needs. Boost also has a different library (Program Options) that I
 can use for reading the configuration file.
 
-The application will be in one of the three states Setup, Move, and Read at all
+The application will be in one of the three states Setup, Move, and Wait at all
 times. The initial state is Setup. In this state, the application is working to
 establish connections with the previous and next players in the order. When this
 state is entered, asynchronous operations for accepting a connection from the
 previous player and making a connection to the next player are started. This
 state is exited when there is a connection with both the next and previous
 player. The next state depends on whether the player ID is 0. If the player ID
-is 0, the next state is Move; otherwise, it is Read. In the Move state, a cursor
+is 0, the next state is Move; otherwise, it is Wait. In the Move state, a cursor
 is displayed in the board, which can be moved around using the keyboard. When
 the user accepts the selection, a message is sent to the next player and the
-state transitions to Read. In the Read state, the application recieves messages
+state transitions to Wait. In the Wait state, the application recieves messages
 from the previous player, updates the board accordingly, and passes the
 message on, unless its player ID matches that of the next player. If the message
 has the player ID of the previous player, the application transitions to the
 Move state.
+
+## 11/29/19
+Since I'm limiting my project to 3 dimensions, I don't need the n-dimensional
+array I created earlier. Knowing the number of dimensions at compile time has
+the great advantage of being able to use static memory for the coordinate. This
+means that repeated element access from the draw() method is faster. Right now,
+I'm implementing this specifically for three dimensions. This is sufficient for
+my application. I could make the class template take as a parameter the number
+of dimensions to be able to reuse this code for other applications, but there is
+no practical reason for me to do this, since I'm only dealing with 3.
+
+I started implementing the 3D view of the board today. I render a 3D scene
+through an ofEasyCam. Using ofEasyCam means that I can rotate the view and
+zoom using the mouse with no extra code. I draw (n+1)^3 lines to make an n*n*n
+grid. One corner of the grid is at (0, 0, 0), and the grid is drawn in the first
+octant. Each move/player marker is represented by an opaque sphere with diameter
+60% of the side length of the cubical slots. The move location selection cursor
+is represented by a translucent sphere with diameter 80% of the side length of
+the cubical slots.
+
+I am able to set the initial viewpoint of the camera using a precise sequence of
+calls on the object during setup(). This gave me a lot of trouble, since other
+orders of these calls make the camera look from a strange vantage point without
+much information as to why. Some recent updates to the ofEasyCam on GitHub may
+address these issues, but there has not been a release of openFrameworks since
+these changes have been made.
+
+I call ofEnableDepthTest() and ofEnableBlendMode(OF_BLENDMODE_ALPHA) in setup(),
+to tweak some settings of the renderer to try to make the view look better.
+ofEnableDepthTest() makes the lines that are in front of an object that is
+inside the grid appear in front of it, and the lines that are behind it appear
+behind it. Otherwise, the lines will either all be in front of the object or all
+behind. ofEnableBlendMode(OF_BLENDMODE_ALPHA) makes it sometimes possible to see
+objects that are behind a partially transparent object. The order in which draw
+calls are made affects which objects can be seen through which. There are some
+other slightly glitchy things with translucent objects, too.
+
+## 11/30/19
+The different states have differences in what needs to be drawn. So, I have a
+separate draw function for each state. I have a pointer-to-member that points to
+the draw function corresponding to the current state, and when the application
+switches states, that pointer is changed. The body of the draw() function itself
+simply calls the active draw function on the current object.
+
+Today I added support for reading the config file to initialize the game. A
+config file for a 1-player game looks like this:
+```
+sideLength = 4
+playerCount = 1
+playerIndex = 0
+
+myPort = 1025
+nextAddress = 127.0.0.1
+nextPort = 1025
+```
+I use the boost program_options library to parse this file. I have a struct that
+includes fields for all of the data I need to get from the config file. I fill
+such a struct in the main function, before initializing the app. Then, I pass
+the struct to the constructor of ofApp when I create an instance and run it. The
+path to the config file, absolute or relative to the current directory, is
+specified as the only command line argument. I decided to specify the
+information only about the next connection, because it is not easy to load
+unknown options from a config file. The only negative to this is that I have to
+put slightly more work into generating the different config files by hand.
+However, in my vision for how this game would be done professionally, the
+central server would be doing this work, which is not difficult.
+
+Today I alos implemented the networking part of the project, using boost::asio.
+In my ofApp, I have members for an io_context (to which all io operations are
+tied), an acceptor (which is essentially the listening part of the app), and two
+sockets (one to connect to the previous player's app and one to connect to the
+next player's app. I also store an endpoint object, which gives the instructions
+on how to connect to the next player (so that I can retry creating the outgoing
+connection without having to re-create the endpoint object), two streambufs
+(through which read and write operations are done), and a boolean which keeps
+track of the state of the outgoing connection. Also, there are a couple of
+std::string members on the class, which I can set based on the connection state
+and which I display during the Setup state. I have a couple of class members
+which have operator() defined, which call the onConnect and onRead functions on
+the instance of ofApp.
+
+The onAccept, onConnect, and onRead functions handle asynchronous I/O events.
+They are responsible for changing the state of the app upon certain conditions.
+They change the pointer-to-member which tells the app which draw method to call,
+and they start the next asynchronous I/O operation that needs to be done.
