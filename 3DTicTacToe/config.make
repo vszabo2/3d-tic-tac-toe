@@ -16,7 +16,7 @@
 #       (default) PROJECT_ROOT = . (this directory)
 #    
 ################################################################################
-# PROJECT_ROOT = .
+PROJECT_ROOT = .
 
 ################################################################################
 # PROJECT SPECIFIC CHECKS
@@ -25,7 +25,8 @@
 #   this makefile.  For instance, if you want to make changes based on whether
 #   GTK is installed, one might test that here and create a variable to check. 
 ################################################################################
-# None
+tests : 
+	make Debug PROJECT_EXTERNAL_SOURCE_PATHS=./test PROJECT_EXCLUSIONS=./src/main% APPNAME=test
 
 ################################################################################
 # PROJECT EXTERNAL SOURCE PATHS
