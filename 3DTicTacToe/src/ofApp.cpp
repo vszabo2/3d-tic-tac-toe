@@ -129,7 +129,8 @@ void ofApp::onRead(const boost::system::error_code& error,
 }
 
 void ofApp::StartGameIfReady() {
-    if (sock_next_connected_ && sock_prev_.is_open() && active_draw_ == &ofApp::drawSetup) {
+    if (sock_next_connected_ && sock_prev_.is_open() &&
+        active_draw_ == &ofApp::drawSetup) {
         if (game_config_.player_index == 0) {
             active_draw_ = &ofApp::drawMove;
         } else {
@@ -180,6 +181,7 @@ void ofApp::setup() {
     ofEnableDepthTest();
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
+    accept_handler_.owner = this;
     connect_handler_.owner = this;
     read_handler_.owner = this;
 
@@ -188,9 +190,7 @@ void ofApp::setup() {
     acceptor_.open(boost::asio::ip::tcp::v4());
     acceptor_.bind(server_endpoint);
     acceptor_.listen(1);
-    acceptor_.async_accept(
-        sock_prev_,
-        [this](const boost::system::error_code& err) { this->onAccept(err); });
+    acceptor_.async_accept(sock_prev_, accept_handler_);
 
     sock_next_.async_connect(next_player_endpoint_, connect_handler_);
     sock_next_.set_option(boost::asio::ip::tcp::no_delay(true));

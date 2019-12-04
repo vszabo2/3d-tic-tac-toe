@@ -57,12 +57,15 @@ class ofApp : public ofBaseApp {
             (owner->*handler_)(args...);
         }
     };
+    Handler<void (ofApp::*)(const boost::system::error_code&)> accept_handler_;
     Handler<void (ofApp::*)(const boost::system::error_code&)> connect_handler_;
-    Handler<void (ofApp::*)(const boost::system::error_code&, std::size_t)> read_handler_;
+    Handler<void (ofApp::*)(const boost::system::error_code&, std::size_t)>
+        read_handler_;
 
     void onAccept(const boost::system::error_code& error);
     void onConnect(const boost::system::error_code& error);
-    void onRead(const boost::system::error_code& error, std::size_t bytes_transferred);
+    void onRead(const boost::system::error_code& error,
+                std::size_t bytes_transferred);
     void StartGameIfReady();
     void SendMove(const char message[]);
 
@@ -92,6 +95,7 @@ class ofApp : public ofBaseApp {
               boost::asio::ip::make_address(config.next_address),
               config.next_port),
           sock_next_connected_(false),
+          accept_handler_(&ofApp::onAccept),
           connect_handler_(&ofApp::onConnect),
           read_handler_(&ofApp::onRead) {}
 
