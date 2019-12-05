@@ -73,7 +73,7 @@ class ofApp : public ofBaseApp {
     void DrawField();
     void DrawCursor();
     void DrawMarkers();
-    void DrawMarker(char playerIdx, Position position);
+    void DrawMarker(char player_index, Position position);
     inline void DrawBoard();
 
     void (ofApp::*active_draw_)();

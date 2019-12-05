@@ -46,9 +46,9 @@ void ofApp::DrawMarkers() {
     }
 }
 
-void ofApp::DrawMarker(char playerIdx, Position position) {
+void ofApp::DrawMarker(char player_index, Position position) {
     ofPushStyle();
-    ofSetColor(colors_[playerIdx]);
+    ofSetColor(colors_[player_index]);
     ofDrawSphere(GetCenterOfPosition(position),
                  marker_size_factor_ * slot_size_ / 2);
     ofPopStyle();
@@ -76,7 +76,7 @@ void ofApp::onAccept(const boost::system::error_code& error) {
 }
 
 void ofApp::onConnect(const boost::system::error_code& error) {
-    std::cout << "Connected Error: " << error << std::endl;
+    std::cout << "Connected. Error: " << error << std::endl;
     if (error) {
         next_player_connection_status_ =
             "Failed to connect to next player. Retrying...";
@@ -95,8 +95,8 @@ void ofApp::onConnect(const boost::system::error_code& error) {
 
 void ofApp::onRead(const boost::system::error_code& error,
                    std::size_t bytes_transferred) {
+    std::cerr << "Read. Error: " << error << std::endl;
     if (error) {
-        std::cerr << "Read Error: " << error << std::endl;
         ofExit();
     } else {
         recv_buf_.commit(bytes_transferred);
@@ -156,8 +156,6 @@ void ofApp::SendMove(const char message[]) {
 //--------------------------------------------------------------
 void ofApp::setup() {
     field_size_ = board_.GetSideLength() * slot_size_;
-    board_[{0, 0, 0}] = 1;
-    board_[{1, 1, 1}] = 0;
     cursor_position_ = {0, 0, 0};
     active_draw_ = &ofApp::drawSetup;
 
@@ -188,6 +186,7 @@ void ofApp::setup() {
     boost::asio::ip::tcp::endpoint server_endpoint(boost::asio::ip::tcp::v4(),
                                                    game_config_.my_port);
     acceptor_.open(boost::asio::ip::tcp::v4());
+    acceptor_.set_option(boost::asio::socket_base::reuse_address(true));
     acceptor_.bind(server_endpoint);
     acceptor_.listen(1);
     acceptor_.async_accept(sock_prev_, accept_handler_);
