@@ -140,14 +140,6 @@ void ofApp::StartGameIfReady() {
     }
 }
 
-/*
-void ofApp::SendMove() {
-    char message[4] = {game_config_.player_index, cursor_position_.x,
-                       cursor_position_.y, cursor_position_.z};
-    SendMove(message);
-}
-*/
-
 void ofApp::SendMove(const char message[]) {
     send_buf_.sputn(message, 4);
     sock_next_.send(send_buf_.data());
@@ -221,7 +213,45 @@ void ofApp::drawWait() {
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key) {}
+void ofApp::keyPressed(int key) {
+    if (active_draw_ != &ofApp::drawMove) return;
+
+    switch (key) {
+        case 'w':
+            cursor_position_.y = std::min(cursor_position_.y + 1,
+                                          game_config_.side_length - 1);
+            break;
+        case 'a':
+            cursor_position_.x = std::max(cursor_position_.x - 1, 0);
+            break;
+        case 's':
+            cursor_position_.y = std::max(cursor_position_.y - 1, 0);
+            break;
+        case 'd':
+            cursor_position_.x = std::min(cursor_position_.x + 1,
+                                          game_config_.side_length - 1);
+            break;
+        case 'q':
+            cursor_position_.z = std::max(cursor_position_.z - 1, 0);
+            break;
+        case 'e':
+            cursor_position_.z = std::min(cursor_position_.z + 1,
+                                          game_config_.side_length - 1);
+            break;
+        case OF_KEY_RETURN:
+            // TODO: make this work properly for one player
+            if (board_[cursor_position_] != Board::EMPTY) break;
+
+            board_[cursor_position_] = game_config_.player_index;
+
+            char message[4] = {game_config_.player_index, cursor_position_.x,
+                               cursor_position_.y, cursor_position_.z};
+            SendMove(message);
+            active_draw_ = &ofApp::drawWait;
+            sock_prev_.async_read_some(recv_buf_.prepare(4), read_handler_);
+            break;
+    }
+}
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key) {}
