@@ -53,6 +53,8 @@ TEST_CASE("0x0x0 Cube") {
 TEST_CASE("2x2x2 Cube of strings") {
     Cube<std::string, char> arr(2);
 
+    REQUIRE(arr.GetSideLength() == 2);
+
     for (char i = 0; i < 2; ++i) {
         for (char j = 0; j < 2; ++j) {
             for (char k = 0; k < 2; ++k) {
