@@ -82,6 +82,8 @@ void ofApp::onConnect(const boost::system::error_code& error) {
             "Failed to connect to next player. Retrying...";
         sock_next_.async_connect(next_player_endpoint_, connect_handler_);
     } else {
+        sock_next_.set_option(boost::asio::ip::tcp::no_delay(true));
+
         std::stringstream stream;
         stream << "Connected to next player via "
                << sock_next_.local_endpoint().address().to_string() << ':'
@@ -109,6 +111,7 @@ void ofApp::onRead(const boost::system::error_code& error,
         char message[4];
         size_t bytes_got = recv_buf_.sgetn(message, 4);
         assert(bytes_got == 4);
+        assert(recv_buf_.in_avail() == 0);
 
         if (message[0] !=
             (game_config_.player_index + 1) % game_config_.player_count) {
@@ -121,8 +124,7 @@ void ofApp::onRead(const boost::system::error_code& error,
             (game_config_.player_index + game_config_.player_count - 1) %
                 game_config_.player_count) {
             active_draw_ = &ofApp::drawMove;
-            assert(recv_buf_.in_avail() == 0);
-        } else if (recv_buf_.in_avail() < 4) {
+        } else {
             sock_prev_.async_read_some(recv_buf_.prepare(4), read_handler_);
         }
     }
@@ -142,7 +144,9 @@ void ofApp::StartGameIfReady() {
 
 void ofApp::SendMove(const char message[]) {
     send_buf_.sputn(message, 4);
-    sock_next_.send(send_buf_.data());
+    int bytes_sent = sock_next_.send(send_buf_.data());
+    send_buf_.consume(4);
+    std::cerr << "Sent " << bytes_sent << " bytes" << std::endl;
 }
 
 //--------------------------------------------------------------
@@ -184,7 +188,6 @@ void ofApp::setup() {
     acceptor_.async_accept(sock_prev_, accept_handler_);
 
     sock_next_.async_connect(next_player_endpoint_, connect_handler_);
-    sock_next_.set_option(boost::asio::ip::tcp::no_delay(true));
 }
 
 //--------------------------------------------------------------
@@ -248,6 +251,7 @@ void ofApp::keyPressed(int key) {
                                cursor_position_.y, cursor_position_.z};
             SendMove(message);
             active_draw_ = &ofApp::drawWait;
+            io_context_.restart();
             sock_prev_.async_read_some(recv_buf_.prepare(4), read_handler_);
             break;
     }
