@@ -275,7 +275,7 @@ player. The next state depends on whether the player ID is 0. If the player ID
 is 0, the next state is Move; otherwise, it is Wait. In the Move state, a cursor
 is displayed in the board, which can be moved around using the keyboard. When
 the user accepts the selection, a message is sent to the next player and the
-state transitions to Wait. In the Wait state, the application recieves messages
+state transitions to Wait. In the Wait state, the application receives messages
 from the previous player, updates the board accordingly, and passes the
 message on, unless its player ID matches that of the next player. If the message
 has the player ID of the previous player, the application transitions to the
@@ -347,7 +347,7 @@ put slightly more work into generating the different config files by hand.
 However, in my vision for how this game would be done professionally, the
 central server would be doing this work, which is not difficult.
 
-Today I alos implemented the networking part of the project, using boost::asio.
+Today I also implemented the networking part of the project, using boost::asio.
 In my ofApp, I have members for an io_context (to which all io operations are
 tied), an acceptor (which is essentially the listening part of the app), and two
 sockets (one to connect to the previous player's app and one to connect to the
@@ -365,3 +365,98 @@ The onAccept, onConnect, and onRead functions handle asynchronous I/O events.
 They are responsible for changing the state of the app upon certain conditions.
 They change the pointer-to-member which tells the app which draw method to call,
 and they start the next asynchronous I/O operation that needs to be done.
+
+## 12/4/19
+Today I finalized how I will perform automated tests of my code. First, I tried
+having a separate openFrameworks project that would include the directory
+containing all the code and then exclude the main.cpp that runs the app. There
+would be a main.cpp in the test project that would run the tests through Catch.
+This did not work, since it turns out that the openFrameworks makefile does not
+allow for the exclusion of specific files, only directories. I considered making
+a small edit to the openFrameworks makefile to make this possible, but I
+realized that no one else would be able to run my tests without modifying their
+openFrameworks environment. There would be no way for me to run tests using
+standard openFrameworks without having the main project's main.cpp in its own
+directory, so I put it in its own directory. It also turns out that
+openFrameworks looks for source files only in the src directory of the project,
+which is generally expected, but could not be automatically assumed when working
+with openFrameworks. So, I can have another directory alongside src that
+contains the source files of my tests. When I want to create my test executable,
+I just need to include the test directory and exclude the src/main directory
+which contains the application main.cpp. To implement this, I created a new
+make target in config.make, called tests, which does exactly that, as well as
+setting APPNAME so that it creates a distinct executable. Creating the
+application executable is done using an unmodified make Debug or make Release.
+
+I also wrote tests today. One of the only testable portions of my code is the
+Cube class. I wrote tests of all the public methods of Cube for one instance. I
+also tested some methods using different template parameters and constructor
+parameters, including the edge case of 0 side length.
+
+## 12/5/19
+Today I added a way for the user to input a move. It uses the w, a, s, d, q, and
+e keys to move a cursor. I chose these keys due to their popularity in
+different games. The way the w, a, s, and d keys are laid out on the keyboard
+suggests a natural way to use them for moving something in two dimensions. The
+q and e keys are nearby and cause the cursor to move along the other dimension.
+The final selection is accepted using the enter key. This layout of keys seems
+intuitive, at least to me. It would definitely be helpful to have some way for
+the user to see which key moved the cursor in each direction at any point in
+time, or to see which way "up" is, so as not to get disoriented.
+
+I implemented this in the keyPressed function of ofApp. I make sure that the
+keys have no effect unless the current state is the Move state, by testing the
+active_draw_ variable. The letter keys described above modify the attributes of
+the cursor_position_ variable, and I make sure that the cursor cannot be moved
+out of the board. The logic I use for this part depends on the members of
+cursor_position_ to be signed types. Unless there is already a marker in the
+current cursor position, pressing the return key updates the current player's
+view of the board and sends a message to the next player to update all of the
+other players' views. I may consider having some visual feedback if the user
+presses enter where there is already a marker instead of just doing nothing.
+
+## 12/7/19
+There is currently a problem with the networking code. The first player can send
+a move to the second player, the second player will receive the move, and the
+second player and the player before the first player can send a move, but the
+first player will not receive the move of the player before them. I noticed this
+problem when I tried to set up a game of two players. I figured out where the
+error was by creating a two player game whose port numbers did not line up
+exactly, and I used an external program to send and receive (forward) the TCP
+stream between the two games. So, I was able to pinpoint the error to the
+receiving side of the first player.
+
+I double-checked my logic which starts the asynchronous read operation from
+sock_prev_ after the first player presses enter. I use the same two lines of
+code any time I start an asynchronous read throughout the project. (Maybe I
+should consider making those two lines of code into a function.) I also defined
+the macro BOOST_ASIO_ENABLE_HANDLER_TRACKING, which shows debugging information
+about asynchronous operations in boost asio. I could see that the async read
+operation was being started, but was never receiving any data.
+
+To fix this issue, I had to debug into the boost code through the call to
+io_context_.poll() in the update function. The read operation itself and the
+dispatching of the handler occur in this function. I noticed that there were no
+system calls being done during poll, since a member variable `stopped_` was set
+to true by the time the first player was ready to read a move from the player
+before them. It turns out that an io_context / scheduler is stopped when there
+are no asynchronous operations pending. There are no asynchronous operations
+pending during the time when the user enters their move. `stopped_` is set to
+false initially and when a call to the restart function is made. The fix was to
+call restart when the async read operation is started when enter is pressed
+after a move is entered.
+
+After I fixed this issue, another one arose. In a two-player game, the second
+move of the first player would not appear on the second player's screen. This is
+because the first player sent both its first and second moves when it was
+supposed to send just its second move. The second player received the first
+player's first move and the switched to the Move state, not reading the second
+player's second move. This issue is caused by not resetting the buffer used to
+send moves out of the first player. I fixed this issue by calling the consume
+function on this buffer after the send operation completes.
+
+Another change I made was to remove a remove a redundant if condition in onRead
+that was left over from during development, when I had a different structure to
+this function. I also set the TCP no delay option, which should help send
+messages as soon as possible (without waiting for a large enough message), after
+establishing a connection instead of just before.
