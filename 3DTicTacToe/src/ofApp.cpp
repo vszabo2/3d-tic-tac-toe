@@ -61,80 +61,8 @@ inline void ofApp::DrawBoard() {
     DrawMarkers();
 }
 
-void ofApp::onAccept(const boost::system::error_code& error) {
-    std::cout << "Accepted. Error: " << error << std::endl;
-    acceptor_.close();
-    if (error) {
-        prev_player_connection_status_ =
-            "Failed to start server for previous player.";
-    } else {
-        std::stringstream stream;
-        stream << "Previous player connected from "
-               << sock_prev_.remote_endpoint().address().to_string() << ':'
-               << sock_prev_.remote_endpoint().port();
-        prev_player_connection_status_ = stream.str();
-        StartGameIfReady();
-    }
-}
-
-void ofApp::onConnect(const boost::system::error_code& error) {
-    std::cout << "Connected. Error: " << error << std::endl;
-    if (error) {
-        next_player_connection_status_ =
-            "Failed to connect to next player. Retrying...";
-        sock_next_.async_connect(next_player_endpoint_, connect_handler_);
-    } else {
-        sock_next_.set_option(boost::asio::ip::tcp::no_delay(true));
-
-        std::stringstream stream;
-        stream << "Connected to next player via "
-               << sock_next_.local_endpoint().address().to_string() << ':'
-               << sock_next_.local_endpoint().port();
-        next_player_connection_status_ = stream.str();
-
-        sock_next_connected_ = true;
-        StartGameIfReady();
-    }
-}
-
-void ofApp::onRead(const boost::system::error_code& error,
-                   std::size_t bytes_transferred) {
-    std::cerr << "Read. Error: " << error << std::endl;
-    if (error) {
-        ofExit();
-    } else {
-        recv_buf_.commit(bytes_transferred);
-        if (recv_buf_.in_avail() < MESSAGE_SIZE) {
-            sock_prev_.async_read_some(
-                recv_buf_.prepare(MESSAGE_SIZE - recv_buf_.in_avail()),
-                read_handler_);
-            return;
-        }
-
-        char message[MESSAGE_SIZE];
-        size_t bytes_got = recv_buf_.sgetn(message, MESSAGE_SIZE);
-        assert(bytes_got == MESSAGE_SIZE);
-        assert(recv_buf_.in_avail() == 0);
-
-        if (message[0] !=
-            (game_config_.player_index + 1) % game_config_.player_count) {
-            SendMove(message);
-        }
-
-        board_[{message[1], message[2], message[3]}] = message[0];
-
-        if (message[0] ==
-            (game_config_.player_index + game_config_.player_count - 1) %
-                game_config_.player_count) {
-            active_draw_ = &ofApp::drawMove;
-        } else {
-            sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
-                                       read_handler_);
-        }
-    }
-}
-
 void ofApp::StartGameIfReady() {
+    /*
     if (sock_next_connected_ && sock_prev_.is_open() &&
         active_draw_ == &ofApp::drawSetup) {
         if (game_config_.player_index == 0) {
@@ -145,6 +73,7 @@ void ofApp::StartGameIfReady() {
                                        read_handler_);
         }
     }
+    */
 }
 
 void ofApp::SendMove(const char message[]) {
@@ -158,7 +87,6 @@ void ofApp::SendMove(const char message[]) {
 void ofApp::setup() {
     field_size_ = board_.GetSideLength() * slot_size_;
     cursor_position_ = {0, 0, 0};
-    active_draw_ = &ofApp::drawSetup;
 
     next_player_connection_status_ = "Connecting to next player...";
     prev_player_connection_status_ =
@@ -180,45 +108,18 @@ void ofApp::setup() {
     ofEnableDepthTest();
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
-    boost::asio::ip::tcp::endpoint server_endpoint(boost::asio::ip::tcp::v4(),
-                                                   game_config_.my_port);
-    acceptor_.open(boost::asio::ip::tcp::v4());
-    acceptor_.set_option(boost::asio::socket_base::reuse_address(true));
-    acceptor_.bind(server_endpoint);
-    acceptor_.listen(1);
-    acceptor_.async_accept(sock_prev_, accept_handler_);
-
-    sock_next_.async_connect(next_player_endpoint_, connect_handler_);
+    curr_state_ = new StateSetup(this);
 }
 
 //--------------------------------------------------------------
 void ofApp::update() { io_context_.poll(); }
 
 //--------------------------------------------------------------
-void ofApp::draw() { (this->*active_draw_)(); }
-
-void ofApp::drawSetup() {
-    ofDrawBitmapString("Setup", 0, 20);
-    ofDrawBitmapString(prev_player_connection_status_, 0, 40);
-    ofDrawBitmapString(next_player_connection_status_, 0, 60);
-}
-
-void ofApp::drawMove() {
-    cam_.begin();
-    DrawBoard();
-    DrawCursor();
-    cam_.end();
-}
-
-void ofApp::drawWait() {
-    cam_.begin();
-    DrawBoard();
-    cam_.end();
-}
+void ofApp::draw() { curr_state_->draw(); }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-    if (active_draw_ != &ofApp::drawMove) return;
+    //if (active_draw_ != &ofApp::drawMove) return;
 
     switch (key) {
         case 'w':
@@ -242,6 +143,7 @@ void ofApp::keyPressed(int key) {
             cursor_position_.z =
                 std::min(cursor_position_.z + 1, game_config_.side_length - 1);
             break;
+        /*
         case OF_KEY_RETURN:
             // TODO: make this work properly for one player
             if (board_[cursor_position_] != Board::EMPTY) break;
@@ -257,6 +159,7 @@ void ofApp::keyPressed(int key) {
             sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
                                        read_handler_);
             break;
+        */
     }
 }
 

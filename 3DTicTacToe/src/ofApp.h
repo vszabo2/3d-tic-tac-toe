@@ -5,11 +5,13 @@
 
 #include "cube.h"
 #include "ofMain.h"
+#include "state.h"
 
 namespace cs126ttt {
 
 typedef Point<char> Position;
 constexpr size_t MESSAGE_SIZE = sizeof(Position) + 1;  // +1 for player ID
+class State;
 
 struct GameConfig {
     unsigned short side_length;
@@ -39,26 +41,14 @@ class ofApp : public ofBaseApp {
     } board_;
 
     boost::asio::io_context io_context_;
-    boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::ip::tcp::socket sock_next_;
     boost::asio::ip::tcp::socket sock_prev_;
-    boost::asio::ip::tcp::endpoint next_player_endpoint_;
     boost::asio::streambuf send_buf_;
     boost::asio::streambuf recv_buf_;
-    bool sock_next_connected_;
 
     std::string next_player_connection_status_;
     std::string prev_player_connection_status_;
 
-    std::function<void(const boost::system::error_code&)> accept_handler_;
-    std::function<void(const boost::system::error_code&)> connect_handler_;
-    std::function<void(const boost::system::error_code&, std::size_t)>
-        read_handler_;
-
-    void onAccept(const boost::system::error_code& error);
-    void onConnect(const boost::system::error_code& error);
-    void onRead(const boost::system::error_code& error,
-                std::size_t bytes_transferred);
     void StartGameIfReady();
     void SendMove(const char message[]);
 
@@ -69,10 +59,7 @@ class ofApp : public ofBaseApp {
     void DrawMarker(char player_index, Position position);
     inline void DrawBoard();
 
-    void (ofApp::*active_draw_)();
-    void drawSetup();
-    void drawMove();
-    void drawWait();
+    State* curr_state_;
 
    public:
     ofApp(const GameConfig& config)
@@ -81,19 +68,8 @@ class ofApp : public ofBaseApp {
           game_config_(config),
           board_(config.side_length),
           io_context_(),
-          acceptor_(io_context_),
           sock_next_(io_context_),
-          sock_prev_(io_context_),
-          next_player_endpoint_(
-              boost::asio::ip::make_address(config.next_address),
-              config.next_port),
-          sock_next_connected_(false),
-          accept_handler_(
-              std::bind(&ofApp::onAccept, this, std::placeholders::_1)),
-          connect_handler_(
-              std::bind(&ofApp::onConnect, this, std::placeholders::_1)),
-          read_handler_(std::bind(&ofApp::onRead, this, std::placeholders::_1,
-                                  std::placeholders::_2)) {}
+          sock_prev_(io_context_) {}
 
     void setup();
     void update();
@@ -110,6 +86,10 @@ class ofApp : public ofBaseApp {
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
+
+    friend class StateSetup;
+    friend class StateMove;
+    friend class StateWait;
 };
 
 }  // namespace cs126ttt
