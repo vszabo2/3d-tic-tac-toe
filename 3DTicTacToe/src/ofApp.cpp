@@ -1,5 +1,7 @@
 #include "ofApp.h"
 
+namespace cs126ttt {
+
 const float ofApp::slot_size_ = 1;
 const float ofApp::cursor_size_factor_ = 0.8;
 const float ofApp::marker_size_factor_ = 0.6;
@@ -102,15 +104,16 @@ void ofApp::onRead(const boost::system::error_code& error,
         ofExit();
     } else {
         recv_buf_.commit(bytes_transferred);
-        if (recv_buf_.in_avail() < 4) {
+        if (recv_buf_.in_avail() < MESSAGE_SIZE) {
             sock_prev_.async_read_some(
-                recv_buf_.prepare(4 - recv_buf_.in_avail()), read_handler_);
+                recv_buf_.prepare(MESSAGE_SIZE - recv_buf_.in_avail()),
+                read_handler_);
             return;
         }
 
-        char message[4];
-        size_t bytes_got = recv_buf_.sgetn(message, 4);
-        assert(bytes_got == 4);
+        char message[MESSAGE_SIZE];
+        size_t bytes_got = recv_buf_.sgetn(message, MESSAGE_SIZE);
+        assert(bytes_got == MESSAGE_SIZE);
         assert(recv_buf_.in_avail() == 0);
 
         if (message[0] !=
@@ -125,7 +128,8 @@ void ofApp::onRead(const boost::system::error_code& error,
                 game_config_.player_count) {
             active_draw_ = &ofApp::drawMove;
         } else {
-            sock_prev_.async_read_some(recv_buf_.prepare(4), read_handler_);
+            sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
+                                       read_handler_);
         }
     }
 }
@@ -137,15 +141,16 @@ void ofApp::StartGameIfReady() {
             active_draw_ = &ofApp::drawMove;
         } else {
             active_draw_ = &ofApp::drawWait;
-            sock_prev_.async_read_some(recv_buf_.prepare(4), read_handler_);
+            sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
+                                       read_handler_);
         }
     }
 }
 
 void ofApp::SendMove(const char message[]) {
-    send_buf_.sputn(message, 4);
+    send_buf_.sputn(message, MESSAGE_SIZE);
     int bytes_sent = sock_next_.send(send_buf_.data());
-    send_buf_.consume(4);
+    send_buf_.consume(MESSAGE_SIZE);
     std::cerr << "Sent " << bytes_sent << " bytes" << std::endl;
 }
 
@@ -221,8 +226,8 @@ void ofApp::keyPressed(int key) {
 
     switch (key) {
         case 'w':
-            cursor_position_.y = std::min(cursor_position_.y + 1,
-                                          game_config_.side_length - 1);
+            cursor_position_.y =
+                std::min(cursor_position_.y + 1, game_config_.side_length - 1);
             break;
         case 'a':
             cursor_position_.x = std::max(cursor_position_.x - 1, 0);
@@ -231,15 +236,15 @@ void ofApp::keyPressed(int key) {
             cursor_position_.y = std::max(cursor_position_.y - 1, 0);
             break;
         case 'd':
-            cursor_position_.x = std::min(cursor_position_.x + 1,
-                                          game_config_.side_length - 1);
+            cursor_position_.x =
+                std::min(cursor_position_.x + 1, game_config_.side_length - 1);
             break;
         case 'q':
             cursor_position_.z = std::max(cursor_position_.z - 1, 0);
             break;
         case 'e':
-            cursor_position_.z = std::min(cursor_position_.z + 1,
-                                          game_config_.side_length - 1);
+            cursor_position_.z =
+                std::min(cursor_position_.z + 1, game_config_.side_length - 1);
             break;
         case OF_KEY_RETURN:
             // TODO: make this work properly for one player
@@ -247,12 +252,14 @@ void ofApp::keyPressed(int key) {
 
             board_[cursor_position_] = game_config_.player_index;
 
-            char message[4] = {game_config_.player_index, cursor_position_.x,
-                               cursor_position_.y, cursor_position_.z};
+            char message[MESSAGE_SIZE] = {
+                game_config_.player_index, cursor_position_.x,
+                cursor_position_.y, cursor_position_.z};
             SendMove(message);
             active_draw_ = &ofApp::drawWait;
             io_context_.restart();
-            sock_prev_.async_read_some(recv_buf_.prepare(4), read_handler_);
+            sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
+                                       read_handler_);
             break;
     }
 }
@@ -286,3 +293,5 @@ void ofApp::gotMessage(ofMessage msg) {}
 
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo) {}
+
+}  // namespace cs126ttt

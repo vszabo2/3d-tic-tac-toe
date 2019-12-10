@@ -5,7 +5,7 @@
 
 namespace po = boost::program_options;
 
-void ParseConfigFile(const char* config_file_path, GameConfig *config) {
+void ParseConfigFile(const char* config_file_path, cs126ttt::GameConfig *config) {
     po::options_description desc;
     desc.add_options()
         ("sideLength", po::value<unsigned short>(&(config->side_length)), "The number of slots per line")
@@ -28,9 +28,9 @@ int main(int argc, char* argv[]) {
         return 3;
     }
 
-    GameConfig config;
+    cs126ttt::GameConfig config;
     ParseConfigFile(argv[1], &config);
 
     ofSetupOpenGL(1024, 768, OF_WINDOW);
-    ofRunApp(new ofApp(config));
+    ofRunApp(new cs126ttt::ofApp(config));
 }

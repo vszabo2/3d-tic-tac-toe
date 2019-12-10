@@ -2,7 +2,8 @@
 
 #include <algorithm>
 #include <memory>
-#include <boost/lambda/lambda.hpp>
+
+namespace cs126ttt {
 
 template <typename CoordinateType>
 struct Point {
@@ -21,6 +22,7 @@ class Cube {
     explicit Cube(CoordinateType side_length)
         : data_(new ElementType[side_length * side_length * side_length]),
           side_length_(side_length) {}
+
     ElementType& operator[](const Point<CoordinateType>& point) {
         return data_[(point.z * side_length_ + point.y) * side_length_ +
                      point.x];
@@ -30,8 +32,10 @@ class Cube {
         std::for_each(
             data_.get(),
             data_.get() + (side_length_ * side_length_ * side_length_),
-            (boost::lambda::_1 = value));
+            [value](ElementType& el) { el = value; });
     }
 
     int GetSideLength() { return side_length_; };
 };
+
+}  // namespace cs126ttt
