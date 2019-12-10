@@ -180,10 +180,6 @@ void ofApp::setup() {
     ofEnableDepthTest();
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 
-    accept_handler_.owner = this;
-    connect_handler_.owner = this;
-    read_handler_.owner = this;
-
     boost::asio::ip::tcp::endpoint server_endpoint(boost::asio::ip::tcp::v4(),
                                                    game_config_.my_port);
     acceptor_.open(boost::asio::ip::tcp::v4());

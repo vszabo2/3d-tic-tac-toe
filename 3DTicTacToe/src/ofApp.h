@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/asio.hpp>
+#include <functional>
 
 #include "cube.h"
 #include "ofMain.h"
@@ -48,21 +49,10 @@ class ofApp : public ofBaseApp {
 
     std::string next_player_connection_status_;
     std::string prev_player_connection_status_;
-    template <typename HandlerType>
-    class Handler {
-        HandlerType handler_;
 
-       public:
-        ofApp* owner;
-        Handler(HandlerType handler) : handler_(handler) {}
-        template <typename... Args>
-        void operator()(Args... args) {
-            (owner->*handler_)(args...);
-        }
-    };
-    Handler<void (ofApp::*)(const boost::system::error_code&)> accept_handler_;
-    Handler<void (ofApp::*)(const boost::system::error_code&)> connect_handler_;
-    Handler<void (ofApp::*)(const boost::system::error_code&, std::size_t)>
+    std::function<void(const boost::system::error_code&)> accept_handler_;
+    std::function<void(const boost::system::error_code&)> connect_handler_;
+    std::function<void(const boost::system::error_code&, std::size_t)>
         read_handler_;
 
     void onAccept(const boost::system::error_code& error);
@@ -98,9 +88,12 @@ class ofApp : public ofBaseApp {
               boost::asio::ip::make_address(config.next_address),
               config.next_port),
           sock_next_connected_(false),
-          accept_handler_(&ofApp::onAccept),
-          connect_handler_(&ofApp::onConnect),
-          read_handler_(&ofApp::onRead) {}
+          accept_handler_(
+              std::bind(&ofApp::onAccept, this, std::placeholders::_1)),
+          connect_handler_(
+              std::bind(&ofApp::onConnect, this, std::placeholders::_1)),
+          read_handler_(std::bind(&ofApp::onRead, this, std::placeholders::_1,
+                                  std::placeholders::_2)) {}
 
     void setup();
     void update();
