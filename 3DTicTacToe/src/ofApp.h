@@ -3,24 +3,13 @@
 #include <boost/asio.hpp>
 #include <functional>
 
-#include "cube.h"
+#include "game_types.h"
 #include "ofMain.h"
 #include "state.h"
 
 namespace cs126ttt {
 
-typedef Point<char> Position;
-constexpr size_t MESSAGE_SIZE = sizeof(Position) + 1;  // +1 for player ID
 class State;
-
-struct GameConfig {
-    unsigned short side_length;
-    unsigned short player_count;
-    unsigned short player_index;
-    unsigned short my_port;
-    std::string next_address;
-    unsigned short next_port;
-};
 
 class ofApp : public ofBaseApp {
    private:
@@ -34,11 +23,7 @@ class ofApp : public ofBaseApp {
     ofEasyCam cam_;
     Position cursor_position_;
     const GameConfig& game_config_;
-    class Board : public Cube<char, char> {
-       public:
-        static const char EMPTY = -1;
-        Board(char side_length) : Cube<char, char>(side_length) { fill(EMPTY); }
-    } board_;
+    Board board_;
 
     boost::asio::io_context io_context_;
     boost::asio::ip::tcp::socket sock_next_;
