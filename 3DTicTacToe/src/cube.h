@@ -28,6 +28,11 @@ class Cube {
                      point.x];
     }
 
+    const ElementType& operator[](const Point<CoordinateType>& point) const {
+        return data_[(point.z * side_length_ + point.y) * side_length_ +
+                     point.x];
+    }
+
     void fill(ElementType value) {
         std::for_each(
             data_.get(),
@@ -35,7 +40,7 @@ class Cube {
             [value](ElementType& el) { el = value; });
     }
 
-    int GetSideLength() { return side_length_; };
+    int GetSideLength() const { return side_length_; };
 };
 
 }  // namespace cs126ttt
