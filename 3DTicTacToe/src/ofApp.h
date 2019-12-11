@@ -43,13 +43,10 @@ class ofApp : public ofBaseApp {
     boost::asio::io_context io_context_;
     boost::asio::ip::tcp::socket sock_next_;
     boost::asio::ip::tcp::socket sock_prev_;
-    boost::asio::streambuf send_buf_;
-    boost::asio::streambuf recv_buf_;
 
     std::string next_player_connection_status_;
     std::string prev_player_connection_status_;
 
-    void StartGameIfReady();
     void SendMove(const char message[]);
 
     glm::vec3 GetCenterOfPosition(Position position);
@@ -57,9 +54,14 @@ class ofApp : public ofBaseApp {
     void DrawCursor();
     void DrawMarkers();
     void DrawMarker(char player_index, Position position);
-    inline void DrawBoard();
+    void DrawBoard();
 
     State* curr_state_;
+    template <class StateClass>
+    void SetState() {
+        delete curr_state_;
+        curr_state_ = new StateClass(this);
+    }
 
    public:
     ofApp(const GameConfig& config)

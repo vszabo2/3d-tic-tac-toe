@@ -10,7 +10,7 @@ void StateWait::onRead(const boost::system::error_code& error,
     } else {
         recv_buf_.commit(bytes_transferred);
         if (recv_buf_.in_avail() < MESSAGE_SIZE) {
-            sock_prev_.async_read_some(
+            app_->sock_prev_.async_read_some(
                 recv_buf_.prepare(MESSAGE_SIZE - recv_buf_.in_avail()),
                 read_handler_);
             return;
@@ -21,20 +21,20 @@ void StateWait::onRead(const boost::system::error_code& error,
         assert(bytes_got == MESSAGE_SIZE);
         assert(recv_buf_.in_avail() == 0);
 
-        if (message[0] !=
-            (game_config_.player_index + 1) % game_config_.player_count) {
-            SendMove(message);
+        if (message[0] != (app_->game_config_.player_index + 1) %
+                              app_->game_config_.player_count) {
+            app_->SendMove(message);
         }
 
-        board_[{message[1], message[2], message[3]}] = message[0];
+        app_->board_[{message[1], message[2], message[3]}] = message[0];
 
-        if (message[0] ==
-            (game_config_.player_index + game_config_.player_count - 1) %
-                game_config_.player_count) {
-            active_draw_ = &ofApp::drawMove;
+        if (message[0] == (app_->game_config_.player_index +
+                           app_->game_config_.player_count - 1) %
+                              app_->game_config_.player_count) {
+            app_->SetState<StateMove>();
         } else {
-            sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
-                                       read_handler_);
+            app_->sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
+                                             read_handler_);
         }
     }
 }
@@ -42,7 +42,10 @@ void StateWait::onRead(const boost::system::error_code& error,
 StateWait::StateWait(ofApp* app)
     : State(app),
       read_handler_(std::bind(&StateWait::onRead, this, std::placeholders::_1,
-                              std::placeholders::_2)) {}
+                              std::placeholders::_2)) {
+    app_->sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
+                                     read_handler_);
+}
 
 void StateWait::draw() {
     app_->cam_.begin();

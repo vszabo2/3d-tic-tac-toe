@@ -56,27 +56,13 @@ void ofApp::DrawMarker(char player_index, Position position) {
     ofPopStyle();
 }
 
-inline void ofApp::DrawBoard() {
+void ofApp::DrawBoard() {
     DrawField();
     DrawMarkers();
 }
 
-void ofApp::StartGameIfReady() {
-    /*
-    if (sock_next_connected_ && sock_prev_.is_open() &&
-        active_draw_ == &ofApp::drawSetup) {
-        if (game_config_.player_index == 0) {
-            active_draw_ = &ofApp::drawMove;
-        } else {
-            active_draw_ = &ofApp::drawWait;
-            sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
-                                       read_handler_);
-        }
-    }
-    */
-}
-
 void ofApp::SendMove(const char message[]) {
+    boost::asio::streambuf send_buf_;
     send_buf_.sputn(message, MESSAGE_SIZE);
     int bytes_sent = sock_next_.send(send_buf_.data());
     send_buf_.consume(MESSAGE_SIZE);
@@ -119,7 +105,7 @@ void ofApp::draw() { curr_state_->draw(); }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-    //if (active_draw_ != &ofApp::drawMove) return;
+    if (! dynamic_cast<StateMove*>(curr_state_)) return;
 
     switch (key) {
         case 'w':
@@ -143,7 +129,6 @@ void ofApp::keyPressed(int key) {
             cursor_position_.z =
                 std::min(cursor_position_.z + 1, game_config_.side_length - 1);
             break;
-        /*
         case OF_KEY_RETURN:
             // TODO: make this work properly for one player
             if (board_[cursor_position_] != Board::EMPTY) break;
@@ -154,12 +139,10 @@ void ofApp::keyPressed(int key) {
                 game_config_.player_index, cursor_position_.x,
                 cursor_position_.y, cursor_position_.z};
             SendMove(message);
-            active_draw_ = &ofApp::drawWait;
+
             io_context_.restart();
-            sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
-                                       read_handler_);
+            SetState<StateWait>();
             break;
-        */
     }
 }
 

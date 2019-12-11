@@ -15,7 +15,7 @@ class State {
 
    public:
     explicit State(ofApp* app) : app_(app) {}
-    virtual ~State() = 0;
+    virtual ~State() {};
 
     virtual void draw() = 0;
 };
@@ -25,6 +25,7 @@ class StateSetup : public State {
     boost::asio::ip::tcp::acceptor acceptor_;
     boost::asio::ip::tcp::endpoint next_player_endpoint_;
     bool sock_next_connected_;
+    bool sock_prev_connected_;
 
     std::function<void(const boost::system::error_code&)> accept_handler_;
     std::function<void(const boost::system::error_code&)> connect_handler_;
@@ -32,10 +33,10 @@ class StateSetup : public State {
     void onAccept(const boost::system::error_code& error);
     void onConnect(const boost::system::error_code& error);
 
+    void StartGameIfReady();
+
    public:
     explicit StateSetup(ofApp* app);
-
-    virtual ~StateSetup();
 
     virtual void draw();
 };
@@ -44,13 +45,14 @@ class StateMove : public State {
    private:
    public:
     explicit StateMove(ofApp* app);
-    virtual ~StateMove();
 
     virtual void draw();
 };
 
 class StateWait : public State {
    private:
+    boost::asio::streambuf recv_buf_;
+
     std::function<void(const boost::system::error_code&, std::size_t)>
         read_handler_;
 
@@ -59,7 +61,6 @@ class StateWait : public State {
 
    public:
     explicit StateWait(ofApp* app);
-    virtual ~StateWait();
 
     virtual void draw();
 };
