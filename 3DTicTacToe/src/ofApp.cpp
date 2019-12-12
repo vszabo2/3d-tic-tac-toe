@@ -143,7 +143,10 @@ void ofApp::setup() {
 }
 
 //--------------------------------------------------------------
-void ofApp::update() { io_context_.poll(); }
+void ofApp::update() {
+    io_context_.poll();
+    std::this_thread::yield();
+}
 
 //--------------------------------------------------------------
 void ofApp::draw() { curr_state_->draw(); }
