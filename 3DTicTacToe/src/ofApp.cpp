@@ -13,6 +13,14 @@ glm::vec3 ofApp::GetCenterOfPosition(Position position) {
     return result;
 }
 
+void ofApp::DrawCursor() {
+    ofPushStyle();
+    ofSetColor(255, 255, 0, 128);
+    ofDrawSphere(GetCenterOfPosition(cursor_position_),
+                 cursor_size_factor_ * slot_size_ / 2);
+    ofPopStyle();
+}
+
 void ofApp::DrawField() {
     for (int i = 0; i <= board_.GetSideLength(); ++i) {
         for (int j = 0; j <= board_.GetSideLength(); ++j) {
@@ -23,14 +31,6 @@ void ofApp::DrawField() {
             ofDrawLine(a, b, 0, a, b, field_size_);
         }
     }
-}
-
-void ofApp::DrawCursor() {
-    ofPushStyle();
-    ofSetColor(255, 255, 0, 128);
-    ofDrawSphere(GetCenterOfPosition(cursor_position_),
-                 cursor_size_factor_ * slot_size_ / 2);
-    ofPopStyle();
 }
 
 void ofApp::DrawMarkers() {
@@ -105,7 +105,7 @@ void ofApp::draw() { curr_state_->draw(); }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-    if (! dynamic_cast<StateMove*>(curr_state_)) return;
+    if (!dynamic_cast<StateMove*>(curr_state_)) return;
 
     switch (key) {
         case 'w':

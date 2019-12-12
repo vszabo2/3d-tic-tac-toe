@@ -35,8 +35,8 @@ class ofApp : public ofBaseApp {
     void SendMove(const char message[]);
 
     glm::vec3 GetCenterOfPosition(Position position);
-    void DrawField();
     void DrawCursor();
+    void DrawField();
     void DrawMarkers();
     void DrawMarker(char player_index, Position position);
     void DrawBoard();

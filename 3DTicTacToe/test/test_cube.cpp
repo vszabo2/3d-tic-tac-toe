@@ -58,7 +58,7 @@ TEST_CASE("2x2x2 Cube of strings") {
     for (char i = 0; i < 2; ++i) {
         for (char j = 0; j < 2; ++j) {
             for (char k = 0; k < 2; ++k) {
-                std::stringstream sstream;
+                std::ostringstream sstream;
                 sstream << '{' << i << ',' << j << ',' << k << '}';
                 arr[{i, j, k}] = sstream.str();
             }
@@ -68,7 +68,7 @@ TEST_CASE("2x2x2 Cube of strings") {
     for (char i = 0; i < 2; ++i) {
         for (char j = 0; j < 2; ++j) {
             for (char k = 0; k < 2; ++k) {
-                std::stringstream sstream;
+                std::ostringstream sstream;
                 sstream << '{' << i << ',' << j << ',' << k << '}';
                 CHECK(arr[{i, j, k}] == sstream.str());
             }
