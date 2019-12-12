@@ -1,5 +1,7 @@
 #pragma once
 
+#include <exception>
+
 #include "cube.h"
 
 namespace cs126ttt {
@@ -21,6 +23,14 @@ class Board : public Cube<char, char> {
    public:
     static const char EMPTY = -1;
     Board(char side_length) : Cube<char, char>(side_length) { fill(EMPTY); }
+};
+
+class InvalidPositionException : public std::exception {
+   public:
+    virtual const char* what() const noexcept {
+        return "The requested move is in a position that has already been "
+               "taken.";
+    }
 };
 
 }  // namespace cs126ttt
