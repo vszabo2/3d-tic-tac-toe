@@ -56,6 +56,11 @@ void ofApp::DrawMarker(char player_index, Position position) {
     ofPopStyle();
 }
 
+void ofApp::DrawWinText() {
+    if (winner_message_.size() > 0)
+        ofDrawBitmapStringHighlight(winner_message_, 10, 20);
+}
+
 void ofApp::DrawBoard() {
     DrawField();
     DrawMarkers();
@@ -67,6 +72,30 @@ void ofApp::SendMove(const char message[]) {
     int bytes_sent = sock_next_.send(send_buf_.data());
     send_buf_.consume(MESSAGE_SIZE);
     std::cerr << "Sent " << bytes_sent << " bytes" << std::endl;
+}
+
+bool ofApp::ProcessMove(const char message[]) {
+    Position position = {message[1], message[2], message[3]};
+    if (board_[position] != Board::EMPTY) {
+        throw InvalidPositionException();
+    }
+
+    if (message[0] !=
+        (game_config_.player_index + 1) % game_config_.player_count) {
+        SendMove(message);
+    }
+
+    board_[position] = message[0];
+
+    if (IsWinningMove(board_, position)) {
+        std::ostringstream sstream;
+        sstream << "Player " << (short)message[0] << " has won!";
+        winner_message_ = sstream.str();
+    }
+
+    return message[0] ==
+           (game_config_.player_index + game_config_.player_count - 1) %
+               game_config_.player_count;
 }
 
 //--------------------------------------------------------------
@@ -130,18 +159,20 @@ void ofApp::keyPressed(int key) {
                 std::min(cursor_position_.z + 1, game_config_.side_length - 1);
             break;
         case OF_KEY_RETURN:
-            // TODO: make this work properly for one player
-            if (board_[cursor_position_] != Board::EMPTY) break;
-
-            board_[cursor_position_] = game_config_.player_index;
-
             char message[MESSAGE_SIZE] = {
                 game_config_.player_index, cursor_position_.x,
                 cursor_position_.y, cursor_position_.z};
-            SendMove(message);
 
-            io_context_.restart();
-            SetState<StateWait>();
+            bool transition_move = true;
+            try {
+                transition_move = ProcessMove(message);
+            } catch (InvalidPositionException&) {
+            }
+
+            if (!transition_move) {
+                io_context_.restart();
+                SetState<StateWait>();
+            }
             break;
     }
 }

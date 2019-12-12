@@ -2,8 +2,10 @@
 
 #include <boost/asio.hpp>
 #include <functional>
+#include <sstream>
 
 #include "game_types.h"
+#include "get_winner.h"
 #include "ofMain.h"
 #include "state.h"
 
@@ -31,14 +33,18 @@ class ofApp : public ofBaseApp {
 
     std::string next_player_connection_status_;
     std::string prev_player_connection_status_;
+    std::string winner_message_;
 
     void SendMove(const char message[]);
+    // returns true if the next state should be Read, false if Move
+    bool ProcessMove(const char message[]);
 
     glm::vec3 GetCenterOfPosition(Position position);
     void DrawCursor();
     void DrawField();
     void DrawMarkers();
     void DrawMarker(char player_index, Position position);
+    void DrawWinText();
     void DrawBoard();
 
     State* curr_state_;

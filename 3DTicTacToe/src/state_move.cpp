@@ -9,6 +9,7 @@ void StateMove::draw() {
     app_->DrawBoard();
     app_->DrawCursor();
     app_->cam_.end();
+    app_->DrawWinText();
 }
 
 }  // namespace cs126ttt

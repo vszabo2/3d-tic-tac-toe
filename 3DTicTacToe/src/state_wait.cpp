@@ -21,16 +21,14 @@ void StateWait::onRead(const boost::system::error_code& error,
         assert(bytes_got == MESSAGE_SIZE);
         assert(recv_buf_.in_avail() == 0);
 
-        if (message[0] != (app_->game_config_.player_index + 1) %
-                              app_->game_config_.player_count) {
-            app_->SendMove(message);
+        bool transition_move = false;
+        try {
+            transition_move = app_->ProcessMove(message);
+        } catch (InvalidPositionException& ex) {
+            std::cerr << ex.what() << std::endl;
         }
 
-        app_->board_[{message[1], message[2], message[3]}] = message[0];
-
-        if (message[0] == (app_->game_config_.player_index +
-                           app_->game_config_.player_count - 1) %
-                              app_->game_config_.player_count) {
+        if (transition_move) {
             app_->SetState<StateMove>();
         } else {
             app_->sock_prev_.async_read_some(recv_buf_.prepare(MESSAGE_SIZE),
@@ -51,6 +49,7 @@ void StateWait::draw() {
     app_->cam_.begin();
     app_->DrawBoard();
     app_->cam_.end();
+    app_->DrawWinText();
 }
 
 }  // namespace cs126ttt
