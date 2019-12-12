@@ -1,6 +1,6 @@
-#include <bitset>
-
 #include "get_winner.h"
+
+#include <bitset>
 
 namespace cs126ttt {
 
@@ -57,9 +57,12 @@ bool IsWinningMove(const Board& board, const Position& position) {
 
         // Check the 3-dimensional diagonals
         potentials[CUBE_DIAG1] &= (board[{i, i, i}] == candidate_id);
-        potentials[CUBE_DIAG2] &= (board[{i, i, max_index - i}] == candidate_id);
-        potentials[CUBE_DIAG3] &= (board[{i, max_index - i, i}] == candidate_id);
-        potentials[CUBE_DIAG4] &= (board[{max_index - i, i, i}] == candidate_id);
+        potentials[CUBE_DIAG2] &=
+            (board[{i, i, max_index - i}] == candidate_id);
+        potentials[CUBE_DIAG3] &=
+            (board[{i, max_index - i, i}] == candidate_id);
+        potentials[CUBE_DIAG4] &=
+            (board[{max_index - i, i, i}] == candidate_id);
     }
 
     return potentials.any();

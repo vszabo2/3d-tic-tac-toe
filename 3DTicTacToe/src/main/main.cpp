@@ -5,15 +5,22 @@
 
 namespace po = boost::program_options;
 
-void ParseConfigFile(const char* config_file_path, cs126ttt::GameConfig *config) {
+void ParseConfigFile(const char* config_file_path,
+                     cs126ttt::GameConfig* config) {
     po::options_description desc;
     desc.add_options()
-        ("sideLength", po::value<unsigned short>(&(config->side_length)), "The number of slots per line")
-        ("playerCount", po::value<unsigned short>(&(config->player_count)), "The number of players")
-        ("playerIndex", po::value<unsigned short>(&(config->player_index)), "The index of this player")
-        ("myPort", po::value<unsigned short>(&(config->my_port)), "The port on which to listen")
-        ("nextAddress", po::value<std::string>(&(config->next_address)), "The IP address of the next player")
-        ("nextPort", po::value<unsigned short>(&(config->next_port)), "The port on which the next player is listening");
+        ("sideLength", po::value<unsigned short>(&(config->side_length)),
+         "The number of slots per line")
+        ("playerCount", po::value<unsigned short>(&(config->player_count)),
+         "The number of players")
+        ("playerIndex", po::value<unsigned short>(&(config->player_index)),
+         "The index of this player")
+        ("myPort", po::value<unsigned short>(&(config->my_port)),
+         "The port on which to listen")
+        ("nextAddress", po::value<std::string>(&(config->next_address)),
+         "The IP address of the next player")
+        ("nextPort", po::value<unsigned short>(&(config->next_port)),
+         "The port on which the next player is listening");
 
     auto parsed_options = po::parse_config_file(config_file_path, desc, true);
     po::variables_map vmap;

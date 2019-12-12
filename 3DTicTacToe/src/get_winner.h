@@ -8,4 +8,4 @@ namespace cs126ttt {
 // created a winning state.
 bool IsWinningMove(const Board& board, const Position& position);
 
-}
+}  // namespace cs126ttt

@@ -36,16 +36,16 @@ void ofApp::DrawField() {
 void ofApp::DrawHints() {
     const float half_field = field_size_ / 2;
     const float distance = field_size_ / 4;
-    const float one_and_distance = field_size_ + distance;
+    const float far_distance = field_size_ + distance;
 
     ofPushStyle();
     ofSetColor(ofColor::black);
-    ofDrawBitmapString("W", glm::vec3(half_field, one_and_distance, half_field));
+    ofDrawBitmapString("W", glm::vec3(half_field, far_distance, half_field));
     ofDrawBitmapString("A", glm::vec3(-distance, half_field, half_field));
     ofDrawBitmapString("S", glm::vec3(half_field, -distance, half_field));
-    ofDrawBitmapString("D", glm::vec3(one_and_distance, half_field, half_field));
+    ofDrawBitmapString("D", glm::vec3(far_distance, half_field, half_field));
     ofDrawBitmapString("Q", glm::vec3(half_field, half_field, -distance));
-    ofDrawBitmapString("E", glm::vec3(half_field, half_field, one_and_distance));
+    ofDrawBitmapString("E", glm::vec3(half_field, half_field, far_distance));
     ofPopStyle();
 }
 

@@ -15,7 +15,7 @@ class State {
 
    public:
     explicit State(ofApp* app) : app_(app) {}
-    virtual ~State() {};
+    virtual ~State(){};
 
     virtual void draw() = 0;
 };

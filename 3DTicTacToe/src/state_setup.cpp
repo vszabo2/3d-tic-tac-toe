@@ -10,8 +10,8 @@ void StateSetup::onAccept(const boost::system::error_code& error) {
     } else {
         std::stringstream stream;
         stream << "Previous player connected from "
-               << app_->sock_prev_.remote_endpoint().address().to_string() << ':'
-               << app_->sock_prev_.remote_endpoint().port();
+               << app_->sock_prev_.remote_endpoint().address().to_string()
+               << ':' << app_->sock_prev_.remote_endpoint().port();
         app_->prev_player_connection_status_ = stream.str();
 
         sock_prev_connected_ = true;
@@ -49,16 +49,17 @@ void StateSetup::StartGameIfReady() {
 }
 
 StateSetup::StateSetup(ofApp* app)
-        : State(app),
-          acceptor_(app->io_context_),
-          next_player_endpoint_(
-              boost::asio::ip::make_address(app->game_config_.next_address),
-              app->game_config_.next_port),
-          sock_next_connected_(false),
-          sock_prev_connected_(false),
-          accept_handler_(std::bind(&StateSetup::onAccept, this, std::placeholders::_1)),
-          connect_handler_(
-              std::bind(&StateSetup::onConnect, this, std::placeholders::_1)) {
+    : State(app),
+      acceptor_(app->io_context_),
+      next_player_endpoint_(
+          boost::asio::ip::make_address(app->game_config_.next_address),
+          app->game_config_.next_port),
+      sock_next_connected_(false),
+      sock_prev_connected_(false),
+      accept_handler_(
+          std::bind(&StateSetup::onAccept, this, std::placeholders::_1)),
+      connect_handler_(
+          std::bind(&StateSetup::onConnect, this, std::placeholders::_1)) {
     boost::asio::ip::tcp::endpoint server_endpoint(boost::asio::ip::tcp::v4(),
                                                    app_->game_config_.my_port);
     acceptor_.open(boost::asio::ip::tcp::v4());
