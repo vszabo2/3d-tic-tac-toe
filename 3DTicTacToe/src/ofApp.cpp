@@ -33,6 +33,22 @@ void ofApp::DrawField() {
     }
 }
 
+void ofApp::DrawHints() {
+    const float half_field = field_size_ / 2;
+    const float distance = field_size_ / 4;
+    const float one_and_distance = field_size_ + distance;
+
+    ofPushStyle();
+    ofSetColor(ofColor::black);
+    ofDrawBitmapString("W", glm::vec3(half_field, one_and_distance, half_field));
+    ofDrawBitmapString("A", glm::vec3(-distance, half_field, half_field));
+    ofDrawBitmapString("S", glm::vec3(half_field, -distance, half_field));
+    ofDrawBitmapString("D", glm::vec3(one_and_distance, half_field, half_field));
+    ofDrawBitmapString("Q", glm::vec3(half_field, half_field, -distance));
+    ofDrawBitmapString("E", glm::vec3(half_field, half_field, one_and_distance));
+    ofPopStyle();
+}
+
 void ofApp::DrawMarkers() {
     char sl = board_.GetSideLength();
     for (char i = 0; i < sl; ++i) {
@@ -64,6 +80,7 @@ void ofApp::DrawWinText() {
 void ofApp::DrawBoard() {
     DrawField();
     DrawMarkers();
+    DrawHints();
 }
 
 void ofApp::SendMove(const char message[]) {

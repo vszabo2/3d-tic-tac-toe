@@ -40,8 +40,10 @@ class ofApp : public ofBaseApp {
     bool ProcessMove(const char message[]);
 
     glm::vec3 GetCenterOfPosition(Position position);
+
     void DrawCursor();
     void DrawField();
+    void DrawHints();
     void DrawMarkers();
     void DrawMarker(char player_index, Position position);
     void DrawWinText();
