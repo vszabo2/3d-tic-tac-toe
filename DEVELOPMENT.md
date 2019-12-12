@@ -460,3 +460,15 @@ that was left over from during development, when I had a different structure to
 this function. I also set the TCP no delay option, which should help send
 messages as soon as possible (without waiting for a large enough message), after
 establishing a connection instead of just before.
+
+## 12/11/19
+Today I added a function to detect when a player wins. This is important to my
+project, since this does not really count as a game if the player cannot tell
+who wins. This function is called every time a player makes a move. It uses a
+bitset to keep track of the winnability of each way of winning (ie each
+row/column/z-row and each diagonal).
+
+I also added a way for the user to find out which key to press to move the
+cursor in any direction. This will greatly improve usability.
+
+I also wrote README.md and did some final code cleanup.
