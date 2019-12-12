@@ -3,9 +3,9 @@
 
 ## Summary
 This is a program that allows any number of people to play 3D Tic-Tac-Toe, on a
-board of any size. Each player needs a copy of the executable, the ability to
-listen for incoming TCP connections, the ability to make outgoing TCP
-connections, and a proper configuration file.
+board of any size. Each player needs a copy of the executable, a proper
+configuration file, the ability to listen for incoming TCP connections, and
+the ability to make outgoing TCP connections.
 
 ## Dependencies
  * openFrameworks
@@ -36,24 +36,24 @@ This program requires some configuration files to run. They describe how a game
 is set up. Each configuration file needs to have all of the following properties
 defined:
 
- * sideLength
+ * sideLength: 
    The board will be of size sideLength * sideLength * sideLength.
    This property needs to be the same for all players.
- * playerCount
+ * playerCount: 
    The number of players.
    This property needs to be the same for all players.
- * playerIndex
+ * playerIndex: 
    This player's position in the move order, a number between 0 (inclusive) and
 playerCount (exclusive).
    This property needs to be different for all players.
- * myPort
+ * myPort: 
    The port on which to listen for a connection from the previous player in the
 order.
    This property does not need to be the same for all players.
- * nextAddress
+ * nextAddress: 
    The address at which to try to connect to the next player in the order.
    This property does not need to be the same for all players.
- * nextPort
+ * nextPort: 
    The port on which to try to connect to the next player in the order.
    This property does not need to be the same for all players.
 
