@@ -4,7 +4,6 @@ namespace cs126ttt {
 
 void StateWait::onRead(const boost::system::error_code& error,
                        std::size_t bytes_transferred) {
-    std::cerr << "Read. Error: " << error << std::endl;
     if (error) {
         ofExit();
     } else {

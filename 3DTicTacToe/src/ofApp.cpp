@@ -88,7 +88,6 @@ void ofApp::SendMove(const char message[]) {
     send_buf_.sputn(message, MESSAGE_SIZE);
     int bytes_sent = sock_next_.send(send_buf_.data());
     send_buf_.consume(MESSAGE_SIZE);
-    std::cerr << "Sent " << bytes_sent << " bytes" << std::endl;
 }
 
 bool ofApp::ProcessMove(const char message[]) {

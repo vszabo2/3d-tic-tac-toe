@@ -3,7 +3,6 @@
 namespace cs126ttt {
 
 void StateSetup::onAccept(const boost::system::error_code& error) {
-    std::cout << "Accepted. Error: " << error << std::endl;
     acceptor_.close();
     if (error) {
         app_->prev_player_connection_status_ =
@@ -21,7 +20,6 @@ void StateSetup::onAccept(const boost::system::error_code& error) {
 }
 
 void StateSetup::onConnect(const boost::system::error_code& error) {
-    std::cout << "Connected. Error: " << error << std::endl;
     if (error) {
         app_->next_player_connection_status_ =
             "Failed to connect to next player. Retrying...";
