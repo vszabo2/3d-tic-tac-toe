@@ -9,7 +9,7 @@
 #include "ofMain.h"
 #include "state.h"
 
-namespace cs126ttt {
+namespace vszabo2ttt {
 
 class State;
 
@@ -87,4 +87,4 @@ class ofApp : public ofBaseApp {
     friend class StateWait;
 };
 
-}  // namespace cs126ttt
+}  // namespace vszabo2ttt

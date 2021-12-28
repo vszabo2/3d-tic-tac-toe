@@ -1,6 +1,6 @@
 #include "state.h"
 
-namespace cs126ttt {
+namespace vszabo2ttt {
 
 void StateWait::onRead(const boost::system::error_code& error,
                        std::size_t bytes_transferred) {
@@ -51,4 +51,4 @@ void StateWait::draw() {
     app_->DrawWinText();
 }
 
-}  // namespace cs126ttt
+}  // namespace vszabo2ttt

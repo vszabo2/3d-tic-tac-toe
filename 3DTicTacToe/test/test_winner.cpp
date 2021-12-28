@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "get_winner.h"
 
-using namespace cs126ttt;
+using namespace vszabo2ttt;
 
 TEST_CASE("3x3x3") {
     Board board(3);

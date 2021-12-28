@@ -1,6 +1,6 @@
 #include "state.h"
 
-namespace cs126ttt {
+namespace vszabo2ttt {
 
 void StateSetup::onAccept(const boost::system::error_code& error) {
     acceptor_.close();
@@ -77,4 +77,4 @@ void StateSetup::draw() {
     ofDrawBitmapString(app_->next_player_connection_status_, 0, 60);
 }
 
-}  // namespace cs126ttt
+}  // namespace vszabo2ttt

@@ -2,7 +2,7 @@
 
 #include <bitset>
 
-namespace cs126ttt {
+namespace vszabo2ttt {
 
 enum : unsigned char {
     X_WIN = 0,
@@ -68,4 +68,4 @@ bool IsWinningMove(const Board& board, const Position& position) {
     return potentials.any();
 }
 
-}  // namespace cs126ttt
+}  // namespace vszabo2ttt

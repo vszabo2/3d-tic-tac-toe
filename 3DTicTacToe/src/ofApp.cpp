@@ -1,6 +1,6 @@
 #include "ofApp.h"
 
-namespace cs126ttt {
+namespace vszabo2ttt {
 
 const float ofApp::slot_size_ = 1;
 const float ofApp::cursor_size_factor_ = 0.8;
@@ -226,4 +226,4 @@ void ofApp::gotMessage(ofMessage msg) {}
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo) {}
 
-}  // namespace cs126ttt
+}  // namespace vszabo2ttt

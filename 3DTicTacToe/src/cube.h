@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <memory>
 
-namespace cs126ttt {
+namespace vszabo2ttt {
 
 template <typename CoordinateType>
 struct Point {
@@ -43,4 +43,4 @@ class Cube {
     int GetSideLength() const { return side_length_; };
 };
 
-}  // namespace cs126ttt
+}  // namespace vszabo2ttt

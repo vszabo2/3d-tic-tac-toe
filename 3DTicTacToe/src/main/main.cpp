@@ -6,7 +6,7 @@
 namespace po = boost::program_options;
 
 void ParseConfigFile(const char* config_file_path,
-                     cs126ttt::GameConfig* config) {
+                     vszabo2ttt::GameConfig* config) {
     po::options_description desc;
     desc.add_options()
         ("sideLength", po::value<unsigned short>(&(config->side_length)),
@@ -35,9 +35,9 @@ int main(int argc, char* argv[]) {
         return 3;
     }
 
-    cs126ttt::GameConfig config;
+    vszabo2ttt::GameConfig config;
     ParseConfigFile(argv[1], &config);
 
     ofSetupOpenGL(1024, 768, OF_WINDOW);
-    ofRunApp(new cs126ttt::ofApp(config));
+    ofRunApp(new vszabo2ttt::ofApp(config));
 }

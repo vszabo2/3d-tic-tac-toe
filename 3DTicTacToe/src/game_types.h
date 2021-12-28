@@ -4,7 +4,7 @@
 
 #include "cube.h"
 
-namespace cs126ttt {
+namespace vszabo2ttt {
 
 typedef Point<char> Position;
 
@@ -33,4 +33,4 @@ class InvalidPositionException : public std::exception {
     }
 };
 
-}  // namespace cs126ttt
+}  // namespace vszabo2ttt

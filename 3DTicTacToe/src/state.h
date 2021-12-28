@@ -5,7 +5,7 @@
 
 #include "ofApp.h"
 
-namespace cs126ttt {
+namespace vszabo2ttt {
 
 class ofApp;
 
@@ -65,4 +65,4 @@ class StateWait : public State {
     virtual void draw();
 };
 
-}  // namespace cs126ttt
+}  // namespace vszabo2ttt

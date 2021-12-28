@@ -1,6 +1,6 @@
 #include "state.h"
 
-namespace cs126ttt {
+namespace vszabo2ttt {
 
 StateMove::StateMove(ofApp* app) : State(app) {}
 
@@ -12,4 +12,4 @@ void StateMove::draw() {
     app_->DrawWinText();
 }
 
-}  // namespace cs126ttt
+}  // namespace vszabo2ttt

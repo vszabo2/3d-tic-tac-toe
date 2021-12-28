@@ -4,7 +4,7 @@
 #include "cube.h"
 
 TEST_CASE("4x4x4 Cube") {
-    cs126ttt::Cube<int, int> arr(4);
+    vszabo2ttt::Cube<int, int> arr(4);
 
     SECTION("GetSideLength") { REQUIRE(arr.GetSideLength() == 4); }
 
@@ -45,13 +45,13 @@ TEST_CASE("4x4x4 Cube") {
 
 TEST_CASE("0x0x0 Cube") {
     // We mostly care that it doesn't crash here
-    cs126ttt::Cube<int, int> arr(0);
+    vszabo2ttt::Cube<int, int> arr(0);
     REQUIRE(arr.GetSideLength() == 0);
     arr.fill(7);
 }
 
 TEST_CASE("2x2x2 Cube of strings") {
-    cs126ttt::Cube<std::string, char> arr(2);
+    vszabo2ttt::Cube<std::string, char> arr(2);
 
     REQUIRE(arr.GetSideLength() == 2);
 
