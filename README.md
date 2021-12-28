@@ -1,6 +1,10 @@
 3D Tic-Tac-Toe
 ===
 
+![screenshot with a few red, green, blue, and purple balls scattered within a
+3 by 3 by 3 wire grid. 3 red balls are in a row, and the text "Player 0 has
+won!" is displayed in the upper left](screenshot.png)
+
 ## Summary
 This is a program that allows any number of people to play 3D Tic-Tac-Toe, on a
 board of any size. Each player needs a copy of the executable, a proper
@@ -15,8 +19,8 @@ the ability to make outgoing TCP connections.
 On Linux, with openFrameworks installed and the OF_ROOT environment variable
 pointing to your installation of openFrameworks, building is as easy as:
 ```sh
-git clone https://github.com/CS126FA19/fantastic-finale-vszabo2.git
-cd fantastic-finale-vszabo2/3DTicTacToe
+git clone https://github.com/vszabo2/3d-tic-tac-toe.git
+cd 3d-tic-tac-toe/3DTicTacToe
 make
 ```
 
@@ -59,7 +63,8 @@ order.
 
 The syntax of the config file is a series of lines of the form `property =
 value`. There are some example config files for playing games on one computer
-in the ExampleConfigs directory.
+in the ExampleConfigs directory. `demo.sh` is provided to easily run these
+examples.
 
 ## Usage Instructions
 Each player needs to start the game program and pass as the first command-line
@@ -75,3 +80,11 @@ play will pass to the next player.
 The winner is the first to fill a row/column (in any of the 3
 horizontal/vertical directions) or a diagonal (in any plane) with their own
 marker.
+
+## Networking Details
+The application establishes TCP connections directly between players in a ring.
+The diagram below shows an example for four players. The numbers represent the
+playerIndex, and the arrows represent TCP connections.
+
+![diagram with the numbers 0, 1, 2, and 3, with arrows from 0 to 1, 1 to 2, 2
+to 3, and 3 to 0](networking.png)
