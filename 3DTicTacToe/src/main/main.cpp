@@ -1,7 +1,11 @@
-#include <boost/program_options.hpp>
+#include <iostream>
+#include <string>
 
+#include <boost/program_options.hpp>
+#include <ofMain.h>
+
+#include "game_types.h"
 #include "ofApp.h"
-#include "ofMain.h"
 
 namespace po = boost::program_options;
 
@@ -22,7 +26,7 @@ void ParseConfigFile(const char* config_file_path,
         ("nextPort", po::value<unsigned short>(&(config->next_port)),
          "The port on which the next player is listening");
 
-    auto parsed_options = po::parse_config_file(config_file_path, desc, true);
+    auto parsed_options = po::parse_config_file(config_file_path, desc, false);
     po::variables_map vmap;
     po::store(parsed_options, vmap);
     po::notify(vmap);

@@ -1,14 +1,17 @@
 #pragma once
 
 #include <exception>
+#include <ios>
+#include <string>
 
 #include "cube.h"
 
 namespace vszabo2ttt {
 
-typedef Point<char> Position;
+typedef Point<unsigned char> Position;
 
-constexpr size_t MESSAGE_SIZE = sizeof(Position) + 1;  // +1 for player ID
+constexpr std::streamsize MESSAGE_SIZE =
+    sizeof(Position) + 1;  // +1 for player ID
 
 struct GameConfig {
     unsigned short side_length;
@@ -19,10 +22,13 @@ struct GameConfig {
     unsigned short next_port;
 };
 
-class Board : public Cube<char, char> {
+class Board : public Cube<unsigned char, unsigned char> {
    public:
-    static const char EMPTY = -1;
-    Board(char side_length) : Cube<char, char>(side_length) { fill(EMPTY); }
+    static constexpr unsigned char EMPTY = -1;
+    Board(unsigned char side_length)
+        : Cube<unsigned char, unsigned char>(side_length) {
+        fill(EMPTY);
+    }
 };
 
 class InvalidPositionException : public std::exception {

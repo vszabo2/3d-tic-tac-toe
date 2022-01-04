@@ -1,12 +1,12 @@
 #pragma once
 
+#include <string>
+
 #include <boost/asio.hpp>
-#include <functional>
-#include <sstream>
+#include <ofMain.h>
 
 #include "game_types.h"
 #include "get_winner.h"
-#include "ofMain.h"
 #include "state.h"
 
 namespace vszabo2ttt {
@@ -15,9 +15,9 @@ class State;
 
 class ofApp : public ofBaseApp {
    private:
-    static const float slot_size_;
-    static const float cursor_size_factor_;
-    static const float marker_size_factor_;
+    static constexpr float slot_size_ = 1;
+    static constexpr float cursor_size_factor_ = 0.8;
+    static constexpr float marker_size_factor_ = 0.6;
 
     const ofColor colors_[5];
 
@@ -35,6 +35,14 @@ class ofApp : public ofBaseApp {
     std::string prev_player_connection_status_;
     std::string winner_message_;
 
+    State* curr_state_;
+
+    template <class StateClass>
+    void SetState() {
+        delete curr_state_;
+        curr_state_ = new StateClass(this);
+    }
+
     void SendMove(const char message[]);
     // returns true if the next state should be Read, false if Move
     bool ProcessMove(const char message[]);
@@ -45,26 +53,12 @@ class ofApp : public ofBaseApp {
     void DrawField();
     void DrawHints();
     void DrawMarkers();
-    void DrawMarker(char player_index, Position position);
+    void DrawMarker(unsigned char player_index, Position position);
     void DrawWinText();
     void DrawBoard();
 
-    State* curr_state_;
-    template <class StateClass>
-    void SetState() {
-        delete curr_state_;
-        curr_state_ = new StateClass(this);
-    }
-
    public:
-    ofApp(const GameConfig& config)
-        : colors_({ofColor::red, ofColor::green, ofColor::blue, ofColor::purple,
-                   ofColor::chocolate}),
-          game_config_(config),
-          board_(config.side_length),
-          io_context_(),
-          sock_next_(io_context_),
-          sock_prev_(io_context_) {}
+    ofApp(const GameConfig& config);
 
     void setup();
     void update();

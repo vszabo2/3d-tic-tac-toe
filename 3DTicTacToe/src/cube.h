@@ -34,13 +34,12 @@ class Cube {
     }
 
     void fill(ElementType value) {
-        std::for_each(
-            data_.get(),
-            data_.get() + (side_length_ * side_length_ * side_length_),
-            [value](ElementType& el) { el = value; });
+        std::fill(data_.get(),
+                  data_.get() + (side_length_ * side_length_ * side_length_),
+                  value);
     }
 
-    int GetSideLength() const { return side_length_; };
+    CoordinateType GetSideLength() const { return side_length_; };
 };
 
 }  // namespace vszabo2ttt

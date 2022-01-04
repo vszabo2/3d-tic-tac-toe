@@ -1,7 +1,8 @@
 #pragma once
 
-#include <boost/asio.hpp>
 #include <functional>
+
+#include <boost/asio.hpp>
 
 #include "ofApp.h"
 
@@ -18,6 +19,7 @@ class State {
     virtual ~State(){};
 
     virtual void draw() = 0;
+    virtual void keyPressed(int key) = 0;
 };
 
 class StateSetup : public State {
@@ -39,6 +41,7 @@ class StateSetup : public State {
     explicit StateSetup(ofApp* app);
 
     virtual void draw();
+    virtual void keyPressed(int key) {}
 };
 
 class StateMove : public State {
@@ -47,6 +50,7 @@ class StateMove : public State {
     explicit StateMove(ofApp* app);
 
     virtual void draw();
+    virtual void keyPressed(int key);
 };
 
 class StateWait : public State {
@@ -63,6 +67,7 @@ class StateWait : public State {
     explicit StateWait(ofApp* app);
 
     virtual void draw();
+    virtual void keyPressed(int key) {}
 };
 
 }  // namespace vszabo2ttt

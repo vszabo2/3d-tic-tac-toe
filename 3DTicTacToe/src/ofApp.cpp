@@ -1,10 +1,44 @@
 #include "ofApp.h"
 
+#include <sstream>
+#include <thread>
+
+#include "state.h"
+
 namespace vszabo2ttt {
 
-const float ofApp::slot_size_ = 1;
-const float ofApp::cursor_size_factor_ = 0.8;
-const float ofApp::marker_size_factor_ = 0.6;
+void ofApp::SendMove(const char message[]) {
+    boost::asio::streambuf send_buf_;
+    send_buf_.sputn(message, MESSAGE_SIZE);
+    sock_next_.send(send_buf_.data());
+    send_buf_.consume(MESSAGE_SIZE);
+}
+
+bool ofApp::ProcessMove(const char message[]) {
+    Position position = {static_cast<unsigned char>(message[1]),
+                         static_cast<unsigned char>(message[2]),
+                         static_cast<unsigned char>(message[3])};
+    if (board_[position] != Board::EMPTY) {
+        throw InvalidPositionException();
+    }
+
+    if (message[0] !=
+        (game_config_.player_index + 1) % game_config_.player_count) {
+        SendMove(message);
+    }
+
+    board_[position] = message[0];
+
+    if (IsWinningMove(board_, position)) {
+        std::ostringstream sstream;
+        sstream << "Player " << (short)message[0] << " has won!";
+        winner_message_ = sstream.str();
+    }
+
+    return message[0] ==
+           (game_config_.player_index + game_config_.player_count - 1) %
+               game_config_.player_count;
+}
 
 glm::vec3 ofApp::GetCenterOfPosition(Position position) {
     glm::vec3 result(position.x, position.y, position.z);
@@ -50,12 +84,12 @@ void ofApp::DrawHints() {
 }
 
 void ofApp::DrawMarkers() {
-    char sl = board_.GetSideLength();
-    for (char i = 0; i < sl; ++i) {
-        for (char j = 0; j < sl; ++j) {
-            for (char k = 0; k < sl; ++k) {
+    unsigned char sl = board_.GetSideLength();
+    for (unsigned char i = 0; i < sl; ++i) {
+        for (unsigned char j = 0; j < sl; ++j) {
+            for (unsigned char k = 0; k < sl; ++k) {
                 Position pos = {i, j, k};
-                char marker = board_[pos];
+                unsigned char marker = board_[pos];
                 if (marker != Board::EMPTY) {
                     DrawMarker(marker, pos);
                 }
@@ -64,7 +98,7 @@ void ofApp::DrawMarkers() {
     }
 }
 
-void ofApp::DrawMarker(char player_index, Position position) {
+void ofApp::DrawMarker(unsigned char player_index, Position position) {
     ofPushStyle();
     ofSetColor(colors_[player_index]);
     ofDrawSphere(GetCenterOfPosition(position),
@@ -83,36 +117,14 @@ void ofApp::DrawBoard() {
     DrawHints();
 }
 
-void ofApp::SendMove(const char message[]) {
-    boost::asio::streambuf send_buf_;
-    send_buf_.sputn(message, MESSAGE_SIZE);
-    int bytes_sent = sock_next_.send(send_buf_.data());
-    send_buf_.consume(MESSAGE_SIZE);
-}
-
-bool ofApp::ProcessMove(const char message[]) {
-    Position position = {message[1], message[2], message[3]};
-    if (board_[position] != Board::EMPTY) {
-        throw InvalidPositionException();
-    }
-
-    if (message[0] !=
-        (game_config_.player_index + 1) % game_config_.player_count) {
-        SendMove(message);
-    }
-
-    board_[position] = message[0];
-
-    if (IsWinningMove(board_, position)) {
-        std::ostringstream sstream;
-        sstream << "Player " << (short)message[0] << " has won!";
-        winner_message_ = sstream.str();
-    }
-
-    return message[0] ==
-           (game_config_.player_index + game_config_.player_count - 1) %
-               game_config_.player_count;
-}
+ofApp::ofApp(const GameConfig& config)
+    : colors_{ofColor::red, ofColor::green, ofColor::blue, ofColor::purple,
+              ofColor::chocolate},
+      game_config_(config),
+      board_(config.side_length),
+      io_context_(),
+      sock_next_(io_context_),
+      sock_prev_(io_context_) {}
 
 //--------------------------------------------------------------
 void ofApp::setup() {
@@ -152,49 +164,7 @@ void ofApp::update() {
 void ofApp::draw() { curr_state_->draw(); }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key) {
-    if (!dynamic_cast<StateMove*>(curr_state_)) return;
-
-    switch (key) {
-        case 'w':
-            cursor_position_.y =
-                std::min(cursor_position_.y + 1, game_config_.side_length - 1);
-            break;
-        case 'a':
-            cursor_position_.x = std::max(cursor_position_.x - 1, 0);
-            break;
-        case 's':
-            cursor_position_.y = std::max(cursor_position_.y - 1, 0);
-            break;
-        case 'd':
-            cursor_position_.x =
-                std::min(cursor_position_.x + 1, game_config_.side_length - 1);
-            break;
-        case 'q':
-            cursor_position_.z = std::max(cursor_position_.z - 1, 0);
-            break;
-        case 'e':
-            cursor_position_.z =
-                std::min(cursor_position_.z + 1, game_config_.side_length - 1);
-            break;
-        case OF_KEY_RETURN:
-            char message[MESSAGE_SIZE] = {
-                game_config_.player_index, cursor_position_.x,
-                cursor_position_.y, cursor_position_.z};
-
-            bool transition_move = true;
-            try {
-                transition_move = ProcessMove(message);
-            } catch (InvalidPositionException&) {
-            }
-
-            if (!transition_move) {
-                io_context_.restart();
-                SetState<StateWait>();
-            }
-            break;
-    }
-}
+void ofApp::keyPressed(int key) { curr_state_->keyPressed(key); }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key) {}

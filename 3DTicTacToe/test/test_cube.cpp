@@ -1,4 +1,5 @@
 #include <sstream>
+#include <string>
 
 #include "catch.hpp"
 #include "cube.h"

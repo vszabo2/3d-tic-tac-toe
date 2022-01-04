@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "state.h"
 
 namespace vszabo2ttt {
@@ -27,7 +29,7 @@ void StateSetup::onConnect(const boost::system::error_code& error) {
     } else {
         app_->sock_next_.set_option(boost::asio::ip::tcp::no_delay(true));
 
-        std::stringstream stream;
+        std::ostringstream stream;
         stream << "Connected to next player via "
                << app_->sock_next_.local_endpoint().address().to_string() << ':'
                << app_->sock_next_.local_endpoint().port();

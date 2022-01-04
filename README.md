@@ -13,7 +13,8 @@ the ability to make outgoing TCP connections.
 
 ## Dependencies
  * openFrameworks
- * Boost Asio
+ * Boost.Asio
+ * Boost.Program_options
 
 ## Build Instructions
 On Linux, with openFrameworks installed and the OF_ROOT environment variable
@@ -29,8 +30,8 @@ The executable is generated in the bin subdirectory of 3DTicTacToe.
 The debug build can be done with `make Debug`, and the tests can be built with
 `make tests`.
 
-This project was developed on Linux, with gcc 9.2.0, openFrameworks 10.1, and
-boost 1.71.0. However, C++, openFrameworks, and boost are cross-platform. With
+This project was developed on Linux, with gcc 11.1.0, openFrameworks 0.11.2, and
+boost 1.78.0. However, C++, openFrameworks, and boost are cross-platform. With
 some re-generation of the build files, this project should build on any common
 platform. Some special configuration will be needed on other platforms to link
 to the `boost_program_options` library and to build the tests.
